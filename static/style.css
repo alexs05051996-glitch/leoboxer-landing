@@ -1,0 +1,147 @@
+/* ==========================================
+   БАЗОВЫЕ СБРОСЫ И ФОН ДЛЯ СТРАНИЦЫ
+   ========================================== */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    background-color: #1a1a1a;   /* Тёмный фон для контраста со стеклом */
+    color: #fff;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* ==========================================
+   ШАПКА: ПАРЯЩАЯ СТЕКЛЯННАЯ ПЛАШКА
+   ========================================== */
+.site-header {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: calc(100% - 40px);      /* Отступы по бокам */
+    max-width: 1300px;
+
+    /* Glassmorphism */
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);   /* Safari */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+
+    padding: 12px 30px;
+    transition: background 0.3s ease;
+}
+
+/* Внутренний контейнер – flex-строка */
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: nowrap;
+}
+
+/* Логотип + текст */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.logo-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    white-space: nowrap;
+}
+
+/* Навигация */
+.main-nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: #FFD700;          /* золотой акцент */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* Кнопка «Заказать звонок» */
+.btn-call {
+    background: transparent;
+    border: 2px solid #ffffff;
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-call:hover {
+    background: #ffffff;
+    color: #1a1a1a;
+    border-color: #ffffff;
+}
+
+/* ==========================================
+   АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ
+   ========================================== */
+@media (max-width: 768px) {
+    .main-nav {
+        display: none;          /* Скрываем меню на мобильных */
+    }
+
+    .header-container {
+        justify-content: space-between;   /* Логотип слева, кнопка справа */
+    }
+
+    .logo-text {
+        font-size: 1.2rem;
+    }
+
+    .btn-call {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+    }
+}

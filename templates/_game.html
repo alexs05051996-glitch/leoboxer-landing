@@ -1,0 +1,110 @@
+<!-- Игровой блок геймификации с вертикальной шкалой удара -->
+<section id="game" class="game-section">
+    <div class="container game-container">
+        <h2 class="section-title">Виртуальный удар</h2>
+        <p class="section-description">Проверьте свою силу и получите персональное предложение</p>
+
+        <!-- Вертикальный индикатор силы -->
+        <div id="strength-bar-container" class="strength-bar">
+            <div id="strength-fill" class="strength-fill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div id="strength-value" class="strength-value">0 кг</div>
+
+        <!-- Кнопка запуска анимации -->
+        <button id="hit-button" class="btn btn-hit">ВИРТУАЛЬНЫЙ УДАР</button>
+
+        <!-- Поп-ап с формой захвата лида (скрыт по умолчанию) -->
+        <div id="lead-popup" class="popup" hidden>
+            <div class="popup-content">
+                <h3>Поздравляем! Ваш удар: <span id="result-value"></span> кг</h3>
+                <p>Оставьте контакты, чтобы получить расчёт прибыли для вашего города</p>
+                <form id="lead-form" class="lead-form">
+                    <input type="text" id="lead-name" placeholder="Ваше имя" required>
+                    <input type="tel" id="lead-phone" placeholder="Телефон" required>
+                    <input type="email" id="lead-email" placeholder="Email" required>
+                    <button type="submit" class="btn btn-submit">Получить предложение</button>
+                </form>
+                <button id="close-popup" class="btn btn-close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Скрипт игровой механики (Vanilla JS) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM-элементы
+    const strengthFill = document.getElementById('strength-fill');
+    const strengthValue = document.getElementById('strength-value');
+    const hitButton = document.getElementById('hit-button');
+    const leadPopup = document.getElementById('lead-popup');
+    const resultValue = document.getElementById('result-value');
+    const closePopup = document.getElementById('close-popup');
+    const leadForm = document.getElementById('lead-form');
+
+    // Блокируем кнопку во время анимации
+    let isAnimating = false;
+
+    hitButton.addEventListener('click', function() {
+        if (isAnimating) return;
+        isAnimating = true;
+        hitButton.disabled = true;
+
+        // Случайная сила удара от 50 до 150 кг
+        const targetStrength = Math.floor(Math.random() * 101) + 50;
+        const duration = 1500; // мс
+        const startTime = performance.now();
+
+        function animate(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1); // от 0 до 1
+
+            // Используем easing для имитации нарастания силы
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(eased * targetStrength);
+
+            // Обновляем высоту шкалы (в процентах от максимальных 150 кг)
+            const percent = (current / 150) * 100;
+            strengthFill.style.height = percent + '%';
+            strengthFill.setAttribute('aria-valuenow', current);
+            strengthValue.textContent = current + ' кг';
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Анимация завершена
+                finishAnimation(targetStrength);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    });
+
+    function finishAnimation(finalStrength) {
+        // Показываем поп-ап с результатом
+        resultValue.textContent = finalStrength;
+        leadPopup.hidden = false;
+        // Возвращаем кнопку в активное состояние
+        isAnimating = false;
+        hitButton.disabled = false;
+    }
+
+    // Закрытие поп-апа
+    closePopup.addEventListener('click', function() {
+        leadPopup.hidden = true;
+    });
+
+    // Обработка отправки формы (заглушка)
+    leadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Здесь будет AJAX-отправка на бэкенд
+        const name = document.getElementById('lead-name').value;
+        const phone = document.getElementById('lead-phone').value;
+        const email = document.getElementById('lead-email').value;
+        console.log('Лид:', { name, phone, email });
+        alert('Спасибо! Мы свяжемся с вами.');
+        leadPopup.hidden = true;
+        leadForm.reset();
+    });
+});
+</script>

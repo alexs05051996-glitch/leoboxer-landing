@@ -1,0 +1,24 @@
+<!-- Блок доверия и завода -->
+<section id="production" class="production-section">
+    <div class="container production-container">
+        <h2 class="section-title">Собственное производство</h2>
+        <p class="section-description">Современный завод, контроль качества, сертификаты</p>
+        <div class="production-content">
+            <div class="production-text">
+                <h3>Оборудование и технологии</h3>
+                <p>Описание производственных мощностей.</p>
+                <button class="btn btn-secondary">Смотреть видео с завода</button>
+            </div>
+            <div class="production-gallery">
+                <figure class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/production1.jpg') }}" alt="Цех завода" loading="lazy">
+                    <figcaption>Сборочный цех</figcaption>
+                </figure>
+                <figure class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/production2.jpg') }}" alt="Тестирование" loading="lazy">
+                    <figcaption>Испытательный стенд</figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+</section>
