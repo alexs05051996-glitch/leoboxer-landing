@@ -1,36 +1,35 @@
-import time
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import os
 
 app = FastAPI()
 
-# Монтируем папку static (CSS, JS, изображения) по маршруту /static
+# Подключаем статику (картинки, стили)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Инициализируем шаблоны из папки templates
+# Подключаем шаблоны из правильной папки
 templates = Jinja2Templates(directory="templates")
 
-# Регистрируем глобальную функцию для кэш-брейкинга
-def url_with_timestamp(path: str) -> str:
-    """
-    Возвращает URL статического ресурса с добавленным параметром ?v=<timestamp>,
-    чтобы браузер всегда загружал актуальную версию файла (CSS, JS).
-    Используется в шаблонах: {{ url_with_timestamp('css/style.css') }}
-    """
-    timestamp = int(time.time())
-    return f"/static/{path.lstrip('/')}?v={timestamp}"
+# Чистая функция кэш-брейкинга без побочных эффектов
+def url_with_timestamp(filename: str):
+    path = os.path.join("static", filename)
+    if os.path.exists(path):
+        return f"/static/{filename}?v={int(os.path.getmtime(path))}"
+    return f"/static/{filename}"
 
-templates.env.globals["url_with_timestamp"] = url_with_timestamp
+# ПРАВИЛЬНАЯ РЕГИСТРАЦИЯ: строго через знак равенства (никаких запятых!)
+templates.env.globals['url_with_timestamp'] = url_with_timestamp
 
-@app.get("/")
-async def index(request: Request):
-    """Главная страница лендинга."""
-    return templates.TemplateResponse("index.html", {"request": request})
+# Отключаем кэш шаблонов для совместимости с Jinja2 3.1.6 (баг с нехешируемым ключом)
+templates.env.cache = None
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    # Рендерим главную страницу и передаем ТОЛЬКО словарь контекста
+    return templates.TemplateResponse(request, "index.html", {"request": request})
 
 @app.post("/api/chat")
 async def ai_chat():
-    """
-    Заглушка для будущего AI-эндпоинта (OpenAI / DeepSeek).
-    """
-    return {"status": "ok", "message": "Chat endpoint is ready."}
+    return {"status": "ok", "message": "Чат готов"}
