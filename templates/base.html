@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Франшиза силомеров «ЛЕО БОКСЕР»</title>
     <!-- Основной файл стилей с cache‑breaking параметром -->
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v={{ css_version }}">
+    <link rel="stylesheet" href="{{ url_with_timestamp('style.css') }}">
 </head>
 <body>
     {% block content %}{% endblock %}
 
     <!-- Глобальные скрипты -->
-    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script src="/static/js/main.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
