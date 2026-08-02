@@ -11,7 +11,7 @@
     {% block content %}{% endblock %}
 
     <!-- Глобальные скрипты -->
-    <script src="/static/js/main.js"></script>
+    <script src="{{ url_with_timestamp('main.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
