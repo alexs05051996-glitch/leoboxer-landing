@@ -1,10 +1,42 @@
-<!-- Главный экран с фоном неоновых кирпичей -->
-<section id="hero" class="hero-section">
-    <div class="container hero-container">
-        <h1 class="hero-title">Здесь будет главный заголовок</h1>
-        <p class="hero-subtitle">Подзаголовок о франшизе силомеров</p>
-        <button class="btn btn-primary">Записаться на презентацию</button>
-        <!-- Фоновое изображение задаётся через CSS (bg-loft.png) -->
-        <div class="hero-bg" aria-hidden="true"></div>
+<!-- Главный экран: две колонки с заголовком, CTA и изображением силомера -->
+<section id="hero" class="hero">
+    <div class="container">
+        <!-- Левая колонка (текст) -->
+        <div class="hero-left">
+            <div class="glass-card">
+                <h1>
+                    ОТКРОЙ СВОЙ БИЗНЕС НА БОКСЕРСКИХ СИЛОМЕРАХ И ЗАРАБАТЫВАЙ ОТ
+                    <strong class="highlight">1 200 000 ₽</strong> В ГОД
+                    <strong class="highlight">С ОДНОГО АППАРАТА</strong>
+                </h1>
+                <p class="hero-subtitle">
+                    Пассивный доход в сфере развлекательного вендинга напрямую от завода.
+                    Без сотрудников. Контроль сети со смартфона. Занимает всего 1 кв. метр.
+                </p>
+                <button class="btn-hero-cta">Получить бизнес-план</button>
+                <span class="hero-footnote">*на основе средней выручки действующих партнеров сети</span>
+            </div>
+        </div>
+
+        <!-- Правая колонка (контакты + изображение) -->
+        <div class="hero-right">
+            <!-- Блок с телефоном и иконками мессенджеров -->
+            <div class="hero-contacts">
+                <a href="tel:89999999999" class="hero-contacts-phone">8 (999) 999-99-99</a>
+                <div class="hero-contacts-icons">
+                    <a href="#" class="hero-contacts-icon telegram" aria-label="Telegram">
+                        <img src="{{ url_with_timestamp('telegram.svg') }}" alt="Telegram" width="28" height="28">
+                    </a>
+                    <a href="#" class="hero-contacts-icon whatsapp" aria-label="WhatsApp">
+                        <img src="{{ url_with_timestamp('WhatsApp.svg') }}" alt="WhatsApp" width="28" height="28">
+                    </a>
+                    <a href="#" class="hero-contacts-icon max" aria-label="Макс">
+                        <img src="{{ url_with_timestamp('Логотип_MAX.svg') }}" alt="Макс" width="28" height="28">
+                    </a>
+                </div>
+            </div>
+            <img src="{{ url_with_timestamp('logo.png') }}" alt="Коммерческий силомер LEO BOXER">
+            <div class="micro-text">Один удар = 150 ₽ дохода</div>
+        </div>
     </div>
 </section>
