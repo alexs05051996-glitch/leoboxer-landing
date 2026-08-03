@@ -7,6 +7,7 @@
     --neon-purple: #bd00ff;
     --text-light: #ffffff;
     --text-muted: #8a8d98;
+    --font-cyber: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
 }
 
 /* ==========================================
@@ -78,7 +79,7 @@ body {
     border: 1px solid rgba(0, 240, 255, 0.2);
     border-radius: 50px;
 
-    padding: 10px 24px;
+    padding: 6px 24px;
     transition: background 0.3s ease, border-color 0.3s ease;
 }
 
@@ -145,26 +146,207 @@ body {
     text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
 }
 
-/* Кнопка «Заказать звонок» */
-.btn-call {
-    background: transparent;
-    border: 1px solid var(--neon-blue);
-    border-radius: 25px;
-    padding: 8px 24px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--neon-blue);
-    cursor: pointer;
-    transition: all 0.25s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
+/* ==========================================
+   СТЕКЛЯННАЯ КАРТОЧКА (GLASS MORPHISM)
+   ========================================== */
+.glass-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px 30px;
 }
 
-.btn-call:hover {
-    background: rgba(0, 240, 255, 0.1);
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+/* ==========================================
+   HERO-БЛОК (ДВЕ КОЛОНКИ)
+   ========================================== */
+.hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: url('/static/bg-loft.png') center / cover no-repeat;
+    overflow: hidden;
+    padding: 0 5%;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(13, 14, 18, 0.6) 0%,
+        rgba(13, 14, 18, 0.85) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hero-left {
+    flex: 0 0 58%;
+    max-width: 58%;
+    text-align: left;
+}
+
+.hero-left h1 {
+    font-family: var(--font-cyber);
+    color: #fff;
+    font-size: 42px;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.hero-left h1 .highlight {
     color: var(--neon-blue);
+}
+
+.hero-subtitle {
+    color: #ccc;
+    font-size: 18px;
+    line-height: 1.5;
+    margin-bottom: 30px;
+}
+
+.hero-right {
+    flex: 0 0 38%;
+    max-width: 38%;
+    text-align: center;
+}
+
+.hero-right img {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 30px var(--neon-blue));
+}
+
+.hero-right .micro-text {
+    font-family: var(--font-cyber);
+    color: var(--neon-blue);
+    font-size: 16px;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+/* ==========================================
+   HERO-БЛОК: ТЕЛЕФОН И ИКОНКИ МЕССЕНДЖЕРОВ
+   ========================================== */
+.hero-contacts {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 12px 20px;
+}
+
+.hero-contacts-phone {
+    font-size: 36px;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+
+.hero-contacts-phone:hover {
+    color: var(--neon-blue);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+}
+
+.hero-contacts-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.hero-contacts-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-decoration: none;
+    transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+}
+
+.hero-contacts-icon img {
+    width: 32px;
+    height: 32px;
+    filter: none;
+    display: block;
+}
+
+/* Telegram — голубое свечение */
+.hero-contacts-icon.telegram:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 0 16px rgba(0, 136, 204, 0.7);
+    border-color: #0088cc;
+}
+
+/* WhatsApp — зелёное свечение */
+.hero-contacts-icon.whatsapp:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 0 16px rgba(37, 211, 102, 0.7);
+    border-color: #25D366;
+}
+
+/* Макс — фиолетовое свечение */
+.hero-contacts-icon.max:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 0 16px rgba(189, 0, 255, 0.7);
+    border-color: var(--neon-purple);
+}
+
+/* ==========================================
+   КНОПКА CTA В HERO
+   ========================================== */
+.btn-hero-cta {
+    background: #111;
+    color: #fff;
+    padding: 16px 48px;
+    border-radius: 30px;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.2s;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.btn-hero-cta:hover {
+    box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple);
+    transform: scale(1.02);
+}
+
+.hero-footnote {
+    display: block;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #999;
+    opacity: 0.7;
 }
 
 /* ==========================================
@@ -172,19 +354,96 @@ body {
    ========================================== */
 @media (max-width: 768px) {
     .main-nav {
-        display: none;          /* Скрываем меню на мобильных */
+        display: none;
     }
 
     .header-container {
-        justify-content: space-between;   /* Логотип слева, кнопка справа */
+        justify-content: space-between;
     }
 
     .logo-text {
         font-size: 1.2rem;
     }
+}
 
-    .btn-call {
-        padding: 8px 18px;
-        font-size: 0.85rem;
+/* Адаптивность для hero */
+@media (max-width: 992px) {
+    .hero-left,
+    .hero-right {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .hero-right {
+        margin-top: 30px;
+    }
+
+    .hero-right img {
+        max-width: 80%;
+    }
+
+    .hero-left h1 {
+        font-size: 32px;
+    }
+
+    .hero-contacts {
+        gap: 0;
+    }
+
+    .hero-contacts-phone {
+        font-size: 28px;
+    }
+
+    .hero-contacts-icons {
+        gap: 12px;
+    }
+
+    .hero-contacts-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hero-contacts-icon img {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-left h1 {
+        font-size: 26px;
+    }
+
+    .btn-hero-cta {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 18px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .hero-contacts {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .hero-contacts-phone {
+        font-size: 22px;
+    }
+
+    .hero-contacts-icons {
+        gap: 8px;
+    }
+
+    .hero-contacts-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hero-contacts-icon img {
+        width: 24px;
+        height: 24px;
     }
 }

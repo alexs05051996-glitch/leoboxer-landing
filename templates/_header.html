@@ -1,13 +1,13 @@
-<!-- Парящая стеклянная шапка «ЛЕО БОКСЕР» -->
+<!-- Парящая стеклянная шапка «LEO BOXER» с логотипом и навигацией -->
 <header id="header" class="site-header">
     <div class="header-container">
-        <!-- Логотип и название -->
-        <a href="/" class="logo-link" aria-label="ЛЕО БОКСЕР — на главную">
-            <img src="{{ url_with_timestamp('logo.png') }}" alt="Логотип ЛЕО БОКСЕР" class="logo-img" width="40" height="40">
-            <span class="logo-text">ЛЕО БОКСЕР</span>
+        <!-- Левая часть: логотип -->
+        <a href="/" class="logo-link" aria-label="LEO BOXER — на главную">
+            <img src="{{ url_with_timestamp('logo.png') }}" alt="Логотип LEO BOXER" class="logo-img" width="40" height="40">
+            <span class="logo-text">LEO BOXER</span>
         </a>
 
-        <!-- Основное меню -->
+        <!-- Центр: основное меню -->
         <nav class="main-nav" aria-label="Главная навигация">
             <ul class="nav-list">
                 <li><a href="#hero" class="nav-link">Главная</a></li>
@@ -18,10 +18,5 @@
                 <li><a href="#footer" class="nav-link">Контакты</a></li>
             </ul>
         </nav>
-
-        <!-- Кнопка действия -->
-        <button class="btn btn-call" onclick="document.getElementById('footer').scrollIntoView({behavior:'smooth'})">
-            Заказать звонок
-        </button>
     </div>
 </header>
