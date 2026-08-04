@@ -5,6 +5,7 @@
     --bg-dark: #0d0e12;
     --neon-blue: #00f0ff;
     --neon-purple: #bd00ff;
+    --neon-pink: #ff2d75;
     --text-light: #ffffff;
     --text-muted: #8a8d98;
     --font-cyber: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
@@ -350,8 +351,35 @@ body {
 }
 
 /* ==========================================
-   АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ
-   ========================================== */
+    НЕОНОВОЕ ВЫДЕЛЕНИЕ ЦИФРЫ (ОФФЕР 120 000 ₽/МЕС)
+    ========================================== */
+.neon-number {
+    font-family: var(--font-cyber);
+    font-size: 4rem;
+    color: var(--neon-pink);
+    text-shadow:
+        0 0 10px var(--neon-pink),
+        0 0 30px var(--neon-pink),
+        0 0 60px var(--neon-pink);
+    animation: pulse 2s ease-in-out infinite;
+    display: inline-block;
+    animation-play-state: paused;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.08);
+        opacity: 0.85;
+    }
+}
+
+/* ==========================================
+    АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ
+    ========================================== */
 @media (max-width: 768px) {
     .main-nav {
         display: none;
@@ -406,6 +434,26 @@ body {
     .hero-contacts-icon img {
         width: 24px;
         height: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .neon-number {
+        font-size: 2.5rem;
+        text-shadow:
+            0 0 6px var(--neon-pink),
+            0 0 18px var(--neon-pink),
+            0 0 36px var(--neon-pink);
+    }
+}
+
+@media (max-width: 480px) {
+    .neon-number {
+        font-size: 2rem;
+        text-shadow:
+            0 0 4px var(--neon-pink),
+            0 0 12px var(--neon-pink),
+            0 0 24px var(--neon-pink);
     }
 }
 
