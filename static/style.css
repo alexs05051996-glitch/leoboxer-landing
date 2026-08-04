@@ -335,11 +335,27 @@ body {
     transition: box-shadow 0.3s ease, transform 0.2s;
     display: inline-block;
     text-decoration: none;
+    animation: wobbleBtn 3s ease-in-out infinite;
 }
 
 .btn-hero-cta:hover {
-    box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-purple);
-    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.6);
+    animation-play-state: running;
+}
+
+.btn-hero-cta:active {
+    transform: scale(0.95);
+    animation-play-state: paused;
+}
+
+@keyframes wobbleBtn {
+    0% { transform: rotate(0deg) scale(1); }
+    15% { transform: rotate(-3deg) scale(1.02); }
+    30% { transform: rotate(3deg) scale(1.02); }
+    45% { transform: rotate(-2deg) scale(1.01); }
+    60% { transform: rotate(2deg) scale(1.01); }
+    75% { transform: rotate(-1deg) scale(1); }
+    100% { transform: rotate(0deg) scale(1); }
 }
 
 .hero-footnote {
@@ -355,12 +371,11 @@ body {
     ========================================== */
 .neon-number {
     font-family: var(--font-cyber);
-    font-size: 4rem;
+    font-size: 2.8rem;
     color: var(--neon-pink);
     text-shadow:
         0 0 10px var(--neon-pink),
-        0 0 30px var(--neon-pink),
-        0 0 60px var(--neon-pink);
+        0 0 30px var(--neon-pink);
     animation: pulse 2s ease-in-out infinite;
     display: inline-block;
     animation-play-state: paused;
@@ -439,7 +454,7 @@ body {
 
 @media (max-width: 768px) {
     .neon-number {
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         text-shadow:
             0 0 6px var(--neon-pink),
             0 0 18px var(--neon-pink),
@@ -449,7 +464,7 @@ body {
 
 @media (max-width: 480px) {
     .neon-number {
-        font-size: 2rem;
+        font-size: 1.5rem;
         text-shadow:
             0 0 4px var(--neon-pink),
             0 0 12px var(--neon-pink),
