@@ -39,7 +39,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: url('/static/bg-loft.png') center / cover no-repeat;
+    background: url('../assets/bg-loft.png') center / cover no-repeat;
     overflow: hidden;
 }
 
@@ -167,7 +167,7 @@ body {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: url('/static/bg-loft.png') center / cover no-repeat;
+    background: url('../assets/bg-loft.png') center / cover no-repeat;
     overflow: hidden;
     padding: 0 5%;
 }
