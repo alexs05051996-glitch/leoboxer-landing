@@ -1,5 +1,8 @@
 <!-- Главный экран: две колонки с заголовком, CTA и изображением силомера -->
 <section id="hero" class="hero">
+    <div class="hero__canvas-wrapper">
+        <canvas id="lightningCanvas"></canvas>
+    </div>
     <div class="container">
         <!-- Левая колонка (текст) -->
         <div class="hero-left">
@@ -33,7 +36,7 @@
                     </a>
                 </div>
             </div>
-            <img src="{{ url_with_timestamp('assets/logo.png') }}" alt="Коммерческий силомер LEO BOXER">
+            <img src="{{ url_with_timestamp('assets/lion-neon.jpg') }}" class="hero__image hero__lion" alt="LEO BOXER">
             <div class="micro-text">Один удар = 150 ₽ дохода</div>
         </div>
     </div>

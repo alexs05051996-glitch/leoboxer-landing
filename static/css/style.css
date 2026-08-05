@@ -452,6 +452,34 @@ body {
     }
 }
 
+/* ==========================================
+   ДИНАМИЧЕСКИЙ ЭФФЕКТ МОЛНИЙ (CANVAS)
+   ========================================== */
+.hero {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero__canvas-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hero__image {
+    position: relative;
+    z-index: 2;
+}
+
+.hero__lion {
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.3));
+}
+
 @media (max-width: 768px) {
     .neon-number {
         font-size: 1.8rem;
