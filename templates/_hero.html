@@ -1,11 +1,8 @@
 <!-- Главный экран: две колонки с заголовком, CTA и изображением силомера -->
 <section id="hero" class="hero">
-    <div class="hero__canvas-wrapper">
-        <canvas id="lightningCanvas"></canvas>
-    </div>
-    <div class="container">
-        <!-- Левая колонка (текст) -->
-        <div class="hero-left">
+    <div class="container hero__container">
+        <!-- Левая часть: текст, УТП, контакты, кнопка -->
+        <div class="hero__content">
             <div class="glass-card">
                 <h1>
                     ОТКРОЙ СВОЙ БИЗНЕС НА БОКСЕРСКИХ СИЛОМЕРАХ И ЗАРАБАТЫВАЙ <span class="neon-number">ОТ 120 000 ₽</span> В МЕСЯЦ С ОДНОГО АППАРАТА
@@ -17,11 +14,7 @@
                 <button class="btn-hero-cta">Получить бизнес-план</button>
                 <span class="hero-footnote">*на основе средней выручки действующих партнеров сети</span>
             </div>
-        </div>
-
-        <!-- Правая колонка (контакты + изображение) -->
-        <div class="hero-right">
-            <!-- Блок с телефоном и иконками мессенджеров -->
+            <!-- Блок контактов: телефон, мессенджеры, строка дохода -->
             <div class="hero-contacts">
                 <a href="tel:89999999999" class="hero-contacts-phone">8 (999) 999-99-99</a>
                 <div class="hero-contacts-icons">
@@ -35,9 +28,16 @@
                         <img src="{{ url_with_timestamp('assets/Логотип_MAX.svg') }}" alt="Макс" width="28" height="28">
                     </a>
                 </div>
+                <div class="micro-text">Один удар = 150 ₽ дохода</div>
             </div>
-            <img src="{{ url_with_timestamp('assets/lion-neon.jpg') }}" class="hero__image hero__lion" alt="LEO BOXER">
-            <div class="micro-text">Один удар = 150 ₽ дохода</div>
+        </div>
+
+        <!-- Правая часть: блок со львом и canvas -->
+        <div class="hero__visual">
+            <div class="hero__visual-inner">
+                <canvas id="lightning-canvas"></canvas>
+                <div class="hero__lion"></div>
+            </div>
         </div>
     </div>
 </section>

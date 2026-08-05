@@ -31,37 +31,6 @@ body {
 }
 
 /* ==========================================
-   HERO SECTION — НЕОНОВЫЙ ФОН С НАЛОЖЕНИЕМ
-   ========================================== */
-.hero-section {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: url('../assets/bg-loft.png') center / cover no-repeat;
-    overflow: hidden;
-}
-
-.hero-section::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(13, 14, 18, 0.6) 0%,
-        rgba(13, 14, 18, 0.85) 100%
-    );
-    z-index: 1;
-    pointer-events: none;
-}
-
-.hero-section .container {
-    position: relative;
-    z-index: 2;
-}
-
-/* ==========================================
    ШАПКА: ПАРЯЩАЯ МАТОВАЯ КАПСУЛА С НЕОНОМ
    ========================================== */
 .site-header {
@@ -160,7 +129,7 @@ body {
 }
 
 /* ==========================================
-   HERO-БЛОК (ДВЕ КОЛОНКИ)
+   HERO — ГИБКАЯ СЕКЦИЯ
    ========================================== */
 .hero {
     position: relative;
@@ -168,8 +137,9 @@ body {
     display: flex;
     align-items: center;
     background: url('../assets/bg-loft.png') center / cover no-repeat;
-    overflow: hidden;
-    padding: 0 5%;
+    overflow: visible;         /* чтобы молнии не обрезались */
+    isolation: isolate;        /* для mix-blend-mode */
+    padding: 80px 5% 60px;
 }
 
 .hero::before {
@@ -185,25 +155,27 @@ body {
     pointer-events: none;
 }
 
-.hero .container {
-    position: relative;
-    z-index: 2;
+.hero__container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    gap: 40px;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
-.hero-left {
-    flex: 0 0 58%;
-    max-width: 58%;
-    text-align: left;
+/* Левая часть — текст */
+.hero__content {
+    flex: 1 1 45%;
+    min-width: 280px;
+    color: #fff;
 }
 
-.hero-left h1 {
+.hero__content h1 {
     font-family: var(--font-cyber);
     color: #fff;
     font-size: 42px;
@@ -212,7 +184,7 @@ body {
     text-transform: uppercase;
 }
 
-.hero-left h1 .highlight {
+.hero__content h1 .highlight {
     color: var(--neon-blue);
 }
 
@@ -223,24 +195,59 @@ body {
     margin-bottom: 30px;
 }
 
-.hero-right {
-    flex: 0 0 38%;
-    max-width: 38%;
-    text-align: center;
+/* Правая часть — блок с визуалом */
+.hero__visual {
+    flex: 1 1 45%;
+    min-width: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.hero-right img {
-    max-width: 100%;
-    height: auto;
-    filter: drop-shadow(0 0 30px var(--neon-blue));
+.hero__visual-inner {
+    position: relative;
+    width: 100%;
+    max-width: 550px;           /* макс. размер на десктопе */
+    aspect-ratio: 1 / 1;        /* квадрат */
+    overflow: visible;
 }
 
-.hero-right .micro-text {
-    font-family: var(--font-cyber);
-    color: var(--neon-blue);
-    font-size: 16px;
-    margin-top: 10px;
-    letter-spacing: 1px;
+/* Canvas и лев внутри visual-inner */
+#lightning-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    isolation: isolate;
+}
+
+.hero__lion {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../assets/lion-neon.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 2;
+    mix-blend-mode: screen !important;
+    opacity: 0.85;
+    filter: none !important;
+    animation: lionBreathe 4s ease-in-out infinite;
+}
+
+@keyframes lionBreathe {
+    0%, 100% {
+        transform: scale(0.98);
+    }
+    50% {
+        transform: scale(1.02);
+    }
 }
 
 /* ==========================================
@@ -251,7 +258,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0;
-    margin-bottom: 20px;
+    margin-top: 20px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 16px;
     padding: 12px 20px;
@@ -409,28 +416,52 @@ body {
     }
 }
 
-/* Адаптивность для hero */
-@media (max-width: 992px) {
-    .hero-left,
-    .hero-right {
-        flex: 0 0 100%;
-        max-width: 100%;
+/* ==========================================
+    АДАПТИВНОСТЬ HERO
+    ========================================== */
+
+/* Планшеты и маленькие ноутбуки (768–1024px) */
+@media (max-width: 1024px) {
+    .hero__container {
+        gap: 30px;
     }
 
-    .hero-right {
-        margin-top: 30px;
+    .hero__content,
+    .hero__visual {
+        flex: 1 1 100%;
+        text-align: center;
     }
 
-    .hero-right img {
-        max-width: 80%;
+    .hero__visual-inner {
+        max-width: 420px;
     }
 
-    .hero-left h1 {
-        font-size: 32px;
+    .hero__content {
+        order: 1;
+    }
+
+    .hero__visual {
+        order: 2;
     }
 
     .hero-contacts {
-        gap: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Мобильные (<768px) */
+@media (max-width: 768px) {
+    .hero {
+        padding: 60px 5% 40px;
+    }
+
+    .hero__visual-inner {
+        max-width: 320px;
+    }
+
+    .hero__content h1 {
+        font-size: 32px;
     }
 
     .hero-contacts-phone {
@@ -450,37 +481,7 @@ body {
         width: 24px;
         height: 24px;
     }
-}
 
-/* ==========================================
-   ДИНАМИЧЕСКИЙ ЭФФЕКТ МОЛНИЙ (CANVAS)
-   ========================================== */
-.hero {
-    position: relative;
-    overflow: hidden;
-}
-
-.hero__canvas-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
-}
-
-.hero__image {
-    position: relative;
-    z-index: 2;
-}
-
-.hero__lion {
-    mix-blend-mode: screen;
-    filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.3));
-}
-
-@media (max-width: 768px) {
     .neon-number {
         font-size: 1.8rem;
         text-shadow:
@@ -490,18 +491,13 @@ body {
     }
 }
 
+/* Очень маленькие экраны (<480px) */
 @media (max-width: 480px) {
-    .neon-number {
-        font-size: 1.5rem;
-        text-shadow:
-            0 0 4px var(--neon-pink),
-            0 0 12px var(--neon-pink),
-            0 0 24px var(--neon-pink);
+    .hero__visual-inner {
+        max-width: 260px;
     }
-}
 
-@media (max-width: 576px) {
-    .hero-left h1 {
+    .hero__content h1 {
         font-size: 26px;
     }
 
@@ -513,11 +509,6 @@ body {
 
     .hero-subtitle {
         font-size: 16px;
-    }
-
-    .hero-contacts {
-        flex-direction: column;
-        gap: 0;
     }
 
     .hero-contacts-phone {
@@ -536,5 +527,13 @@ body {
     .hero-contacts-icon img {
         width: 24px;
         height: 24px;
+    }
+
+    .neon-number {
+        font-size: 1.5rem;
+        text-shadow:
+            0 0 4px var(--neon-pink),
+            0 0 12px var(--neon-pink),
+            0 0 24px var(--neon-pink);
     }
 }
