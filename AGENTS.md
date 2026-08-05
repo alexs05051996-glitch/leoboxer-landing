@@ -61,6 +61,7 @@ Unless the user explicitly asks otherwise, the agent should:
 - Manually edit generated files if the intended workflow is regeneration.
 - Ignore failing checks related to the files or behavior you changed.
 - Guess around security-sensitive, billing-sensitive, or compliance-sensitive behavior.
+- **Execute commands in the terminal** (`ls`, `cd`, `uvicorn`, `git`) when the terminal is already used for running the dev server — this causes conflicts and freezes the agent. The server must be started manually in a separate terminal by the developer.
 
 ---
 
@@ -100,11 +101,11 @@ Do not write "latest". Use exact versions or supported ranges.
 | Area | Library / Service | Version | Purpose | Notes / Constraints |
 | --- | --- | --- | --- | --- |
 | Backend | FastAPI | 0.x | HTTP-сервер, роутинг, статика | Точная версия не зафиксирована (нет requirements.txt) |
-| Backend | Uvicorn | 0.x | ASGI-сервер для запуска | Запуск: `uvicorn app:app --reload` |
+| Backend | Uvicorn | 0.x | ASGI-сервер для запуска | Запуск: `uvicorn app:app --reload` на порту 8000 |
 | Backend | Jinja2 | 3.1.6 | Серверный рендеринг шаблонов | Кэш шаблонов отключён из-за бага с нехешируемым ключом |
 | Backend | python-multipart | 0.x | Парсинг форм (для будущих POST-эндпоинтов) | Точная версия не зафиксирована |
-| Frontend | Vanilla CSS | — | Стили в `static/style.css` | Неоновая палитра: `--neon-blue: #00f0ff`, `--neon-purple: #bd00ff` |
-| Frontend | Vanilla JS | — | Интерактивность (геймификация, формы) | Инлайн-скрипты в `_game.html`, ссылка на `static/js/main.js` |
+| Frontend | Vanilla CSS | — | Стили в `static/css/style.css` | Неоновая палитра: `--neon-blue: #00f0ff`, `--neon-pink: #ff2d75` |
+| Frontend | Vanilla JS | — | Интерактивность (геймификация, формы, молнии) | `static/js/main.js` и `static/js/lightning.js` |
 
 ### Version Policy
 
@@ -119,7 +120,7 @@ Do not write "latest". Use exact versions or supported ranges.
 
 - Architecture style: Монолит (server-side rendered) с разделением на статику и шаблоны
 - High-level description: FastAPI-приложение рендерит единственную страницу (index.html) через Jinja2. Статика (CSS, изображения) раздаётся через `StaticFiles`. Интерактивность — на Vanilla JS внутри шаблонов. Никакого фронтенд-фреймворка, API-слоя или базы данных нет.
-- Main modules / bounded contexts: app (роутинг + шаблоны), static (CSS + изображения), templates (Jinja2-паршалы)
+- Main modules / bounded contexts: app (роутинг + шаблоны), static (CSS + изображения + JS), templates (Jinja2-паршалы)
 - Main data flow: HTTP GET / → FastAPI route → Jinja2 render `index.html` → extends `base.html` → includes partials (`_header`, `_hero`, `_ai_chat`, `_game`, `_production`, `_steps`, `_footer`) → HTML-ответ
 - State management approach: отсутствует (полностью stateless)
 - Integration boundaries: `POST /api/chat` — заглушка для будущего ИИ-чата (возвращает `{"status": "ok"}`)
@@ -130,7 +131,7 @@ Do not write "latest". Use exact versions or supported ranges.
 
 - Вся бизнес-логика — в `app.py` (роуты, хелперы). Не создавать новых Python-модулей без явной задачи.
 - Шаблоны — в `templates/`. Паршалы именуются с префиксом `_` (например, `_header.html`).
-- Статика — в `static/`. CSS в корне `static/`, изображения в `static/` или `static/images/`.
+- Статика — в `static/`. CSS → `static/css/`, JS → `static/js/`, изображения → `static/assets/`. Все пути должны использовать `url_with_timestamp()` для кэш-брейкинга.
 - При изменении CSS/JS — обновлять timestamp через `url_with_timestamp()` (автоматически, функция читает `os.path.getmtime`).
 - Не дублировать логику из `app.py` в шаблоны и наоборот.
 - Не добавлять новые зависимости без явной задачи и без фиксации в requirements.txt.
@@ -142,316 +143,456 @@ Do not write "latest". Use exact versions or supported ranges.
 ```text
 leoboxer-landing/
 ├─ .gitattributes          # Git-конфигурация (LF-нормализация)
-├─ шаблон AGENTS.md        # Исходный шаблон этого файла (на русском)
+├─ AGENTS.md               # Этот файл (обновлён)
 ├─ app.py                  # Точка входа FastAPI: роуты, статика, Jinja2, url_with_timestamp
 ├─ response.html           # Пререндеренный снапшот главной страницы (для отладки)
 ├─ static/
-│  ├─ bg-loft.png          # Фоновое изображение hero-секции (лофт/кирпичи)
-│  ├─ logo.png             # Логотип «ЛЕО БОКСЕР»
-│  └─ style.css            # Все стили лендинга (неоновая палитра, 190 строк)
+│  ├─ css/
+│  │  └─ style.css         # Все стили лендинга (неоновая палитра)
+│  ├─ js/
+│  │  ├─ main.js           # Основной JS (интерактивность)
+│  │  └─ lightning.js      # Генерация молний на canvas (hero-экран)
+│  └─ assets/
+│     ├─ bg-loft.png       # Фоновое изображение hero-секции (кирпичи)
+│     ├─ logo.png          # Логотип «ЛЕО БОКСЕР»
+│     ├─ lion-neon.jpg     # Неоновый лев (чёрный фон, неоновые линии)
+│     ├─ telegram.svg
+│     ├─ WhatsApp.svg
+│     └─ Логотип_MAX.svg
 └─ templates/
    ├─ base.html            # Базовый шаблон: <head>, подключение CSS с кэш-брейкингом
    ├─ index.html           # Главная страница: extends base, включает все паршалы
    ├─ _header.html         # Парящая стеклянная шапка с логотипом и навигацией
-   ├─ _hero.html           # Главный экран с неоновым фоном и заголовком
+   ├─ _hero.html           # Главный экран с кирпичным фоном, неоновым львом и молниями
    ├─ _ai_chat.html        # Блок «Умный расчёт прибыли» с формой ИИ-чата
    ├─ _game.html           # Игровая механика: виртуальный удар + лид-форма (с инлайн-JS)
    ├─ _production.html     # Блок «Собственное производство» с галереей
    ├─ _steps.html          # Пошаговый план запуска (4 шага)
    └─ _footer.html         # Футер: контакты, адрес, документы, соцсети
-```
 
-### Directory Responsibilities
+   Directory Responsibilities
+Path	Responsibility	Typical Contents	Must Not Contain
+static/css/	Стили	style.css	Серверная логика, шаблоны
+static/js/	JavaScript-скрипты	main.js, lightning.js	CSS, изображения
+static/assets/	Изображения, иконки, шрифты	*.png, *.jpg, *.svg	Код, стили
+templates/	Jinja2-шаблоны	base.html, index.html, паршалы _*.html	Статика, Python-код
+app.py	Роутинг, конфигурация шаблонов, хелперы	FastAPI app, url_with_timestamp, роуты	Шаблоны, статика
+Корень	Мета-файлы и точка входа	.gitattributes, AGENTS.md, response.html	Исходники вне app.py
+File Placement Rules
+Новые секции лендинга → templates/_<name>.html + включить в templates/index.html.
 
-| Path | Responsibility | Typical Contents | Must Not Contain |
-| --- | --- | --- | --- |
-| `static/` | Статические файлы (CSS, изображения, JS) | `style.css`, `logo.png`, `bg-loft.png`, `js/main.js` | Серверная логика, шаблоны |
-| `templates/` | Jinja2-шаблоны | `base.html`, `index.html`, паршалы `_*.html` | Статика, Python-код |
-| `app.py` | Роутинг, конфигурация шаблонов, хелперы | FastAPI app, `url_with_timestamp`, роуты | Шаблоны, статика |
-| Корень | Мета-файлы и точка входа | `.gitattributes`, `AGENTS.md`, `response.html` | Исходники вне `app.py` |
+Новые стили → static/css/style.css (единый файл, не дробить без задачи).
 
-### File Placement Rules
+Новые изображения → static/assets/.
 
-- Новые секции лендинга → `templates/_<name>.html` + включить в `templates/index.html`.
-- Новые стили → `static/style.css` (единый файл, не дробить без задачи).
-- Новые изображения → `static/` или `static/images/`.
-- Новые JS-скрипты → `static/js/` (создать папку при необходимости) или инлайн в шаблоне.
-- Новые Python-модули → только с явной задачей, в корне или в пакете.
-- Env/config файлы → корень проекта (`.env` при появлении).
+Новые JS-скрипты → static/js/.
 
----
+Новые Python-модули → только с явной задачей, в корне или в пакете.
 
-## Environment Setup
+Env/config файлы → корень проекта (.env при появлении).
 
-### Required Tooling
+Environment Setup
+Required Tooling
+Required tools: Python 3.10+, pip
 
-- Required tools: Python 3.10+, pip
-- Install dependencies: `pip install fastapi uvicorn jinja2 python-multipart` (точного requirements.txt нет — установить основные пакеты вручную)
-- Start local environment: `uvicorn app:app --reload`
-- Start dependent services only: none
-- Seed / bootstrap data: none
-- Load environment variables from: не требуется (переменные окружения не используются)
-- Required local services: none
+Install dependencies: pip install fastapi uvicorn jinja2 python-multipart (точного requirements.txt нет — установить основные пакеты вручную)
 
-### Setup Notes
+Start local environment: uvicorn app:app --reload (сервер на порту 8000)
 
-- Никаких внешних сервисов (БД, Redis, очереди) не требуется.
-- Docker не требуется.
-- Сервер уже запущен вручную на `http://127.0.0.1:8000` (Status 200). Не перезапускать без явной задачи.
-- При первом клонировании: `pip install fastapi uvicorn jinja2 python-multipart`, затем `uvicorn app:app --reload`.
+Start dependent services only: none
 
----
+Seed / bootstrap data: none
 
-## Development Commands
+Load environment variables from: не требуется (переменные окружения не используются)
 
-| Task | Command | Scope | Notes |
-| --- | --- | --- | --- |
-| Install dependencies | `pip install fastapi uvicorn jinja2 python-multipart` | repo | requirements.txt отсутствует — установка вручную |
-| Start development | `uvicorn app:app --reload` | repo | Запускает сервер на http://127.0.0.1:8000 |
-| Start one service/package | N/A | — | Монолит, один сервис |
-| Build | N/A | — | Нет этапа сборки |
-| Lint | не настроен | — | Линтер отсутствует |
-| Format | не настроен | — | Форматтер отсутствует |
-| Typecheck | не настроен | — | Python без type-checker |
-| Run all tests | не настроен | — | Тесты отсутствуют |
-| Run one test file | не настроен | — | Тесты отсутствуют |
-| Run one test case | не настроен | — | Тесты отсутствуют |
-| Run integration tests | не настроен | — | Тесты отсутствуют |
-| Run e2e tests | не настроен | — | Тесты отсутствуют |
-| Regenerate code | N/A | — | Кодогенерация не используется |
+Required local services: none
 
-### Verification Strategy
+Setup Notes
+Никаких внешних сервисов (БД, Redis, очереди) не требуется.
+
+Docker не требуется.
+
+Сервер уже запущен вручную на http://127.0.0.1:8000. Не перезапускать без явной задачи, и никогда не запускать через агента — только вручную в отдельном терминале.
+
+При первом клонировании: pip install fastapi uvicorn jinja2 python-multipart, затем uvicorn app:app --reload.
+
+Development Commands
+Task	Command	Scope	Notes
+Install dependencies	pip install fastapi uvicorn jinja2 python-multipart	repo	requirements.txt отсутствует — установка вручную
+Start development	uvicorn app:app --reload	repo	Запускает сервер на http://127.0.0.1:8000
+Start one service/package	N/A	—	Монолит, один сервис
+Build	N/A	—	Нет этапа сборки
+Lint	не настроен	—	Линтер отсутствует
+Format	не настроен	—	Форматтер отсутствует
+Typecheck	не настроен	—	Python без type-checker
+Run all tests	не настроен	—	Тесты отсутствуют
+Run one test file	не настроен	—	Тесты отсутствуют
+Run one test case	не настроен	—	Тесты отсутствуют
+Run integration tests	не настроен	—	Тесты отсутствуют
+Run e2e tests	не настроен	—	Тесты отсутствуют
+Regenerate code	N/A	—	Кодогенерация не используется
+Verification Strategy
 
 Проверка выполняется вручную через открытие браузера. Автоматические запросы к серверу из командной строки запрещены.
 
 Порядок проверки:
 
-1. Открыть `http://127.0.0.1:8000` в браузере, убедиться что страница рендерится без ошибок.
-2. Проверить консоль браузера: отсутствие JS-ошибок, 404 на статику.
-3. Проверка `response.html` не автоматизируется — только ручная.
-4. Git diff: проверить, что изменения не затронули критичные участки `app.py`.
+Открыть http://127.0.0.1:8000 в браузере, убедиться что страница рендерится без ошибок.
 
----
+Проверить консоль браузера: отсутствие JS-ошибок, 404 на статику.
 
-## Testing Guide
+Проверка response.html не автоматизируется — только ручная.
 
-- Test framework(s): отсутствуют
-- Unit test location(s): отсутствуют
-- Integration test location(s): отсутствуют
-- E2E test location(s): отсутствуют
-- Contract test location(s): отсутствуют
-- Naming pattern(s): не применимо
-- CI workflow location: отсутствует
+Git diff: проверить, что изменения не затронули критичные участки app.py.
 
-### Testing Rules
+Testing Guide
+Test framework(s): отсутствуют
 
-- Тесты не настроены. При добавлении тестов — использовать `pytest`.
-- Перед изменениями в `app.py` — вручную проверить рендер страницы через браузер.
-- При добавлении форм — проверить отправку и валидацию вручную.
+Unit test location(s): отсутствуют
 
-### Test Matrix
+Integration test location(s): отсутствуют
 
-| Test Type | Path / Scope | Command | When To Run |
-| --- | --- | --- | --- |
-| Manual smoke test | `http://127.0.0.1:8000` | Открыть в браузере | После любых изменений в шаблонах или app.py |
+E2E test location(s): отсутствуют
 
----
+Contract test location(s): отсутствуют
 
-## Code Style And Naming
+Naming pattern(s): не применимо
 
-- Formatter: не настроен (рекомендуется `black` при добавлении)
-- Linter: не настроен (рекомендуется `ruff` при добавлении)
-- Type policy: dynamic (без аннотаций типов, кроме стандартных)
-- Comments policy: комментарии на русском языке, описывают назначение блоков
-- Import policy: стандартные импорты Python, сгруппированные: стандартная библиотека → внешние пакеты
-- Error handling style: исключения FastAPI по умолчанию
-- Logging style: не настроен (используется `print` / `console.log`)
-- Configuration style: хардкод в `app.py`
+CI workflow location: отсутствует
 
-### Naming Conventions We Prefer
+Testing Rules
+Тесты не настроены. При добавлении тестов — использовать pytest.
 
-| Item | Preferred | Avoid | Example |
-| --- | --- | --- | --- |
-| Files | snake_case (Python), kebab-case или snake_case (HTML/CSS) | mixedCase, пробелы | `_ai_chat.html`, `style.css`, `bg-loft.png` |
-| Directories | lowercase, без пробелов | CamelCase, пробелы | `static/`, `templates/` |
-| Classes / components | PascalCase (Python), kebab-case (CSS-классы) | snake_case для CSS | `Jinja2Templates`, `.hero-section` |
-| Functions / methods | snake_case | camelCase | `url_with_timestamp()` |
-| Variables | snake_case (Python), camelCase (JS) | смешанный стиль | `strengthFill` (JS), `target_strength` (Python) |
-| Constants | UPPER_SNAKE (Python), CSS-переменные с `--` | — | `--neon-blue`, `--bg-dark` |
-| Types / interfaces / schemas | не используются | — | — |
-| Test names | не применимо | — | — |
-| Branch names | не зафиксированы | — | — |
+Перед изменениями в app.py — вручную проверить рендер страницы через браузер.
 
-### Style Do / Don't
+При добавлении форм — проверить отправку и валидацию вручную.
 
+Test Matrix
+Test Type	Path / Scope	Command	When To Run
+Manual smoke test	http://127.0.0.1:8000	Открыть в браузере	После любых изменений в шаблонах или app.py
+Code Style And Naming
+Formatter: не настроен (рекомендуется black при добавлении)
+
+Linter: не настроен (рекомендуется ruff при добавлении)
+
+Type policy: dynamic (без аннотаций типов, кроме стандартных)
+
+Comments policy: комментарии на русском языке, описывают назначение блоков
+
+Import policy: стандартные импорты Python, сгруппированные: стандартная библиотека → внешние пакеты
+
+Error handling style: исключения FastAPI по умолчанию
+
+Logging style: не настроен (используется print / console.log)
+
+Configuration style: хардкод в app.py
+
+Naming Conventions We Prefer
+Item	Preferred	Avoid	Example
+Files	snake_case (Python), kebab-case или snake_case (HTML/CSS)	mixedCase, пробелы	_ai_chat.html, style.css, bg-loft.png
+Directories	lowercase, без пробелов	CamelCase, пробелы	static/, templates/
+Classes / components	PascalCase (Python), kebab-case (CSS-классы)	snake_case для CSS	Jinja2Templates, .hero-section
+Functions / methods	snake_case	camelCase	url_with_timestamp()
+Variables	snake_case (Python), camelCase (JS)	смешанный стиль	strengthFill (JS), target_strength (Python)
+Constants	UPPER_SNAKE (Python), CSS-переменные с --	—	--neon-blue, --bg-dark
+Types / interfaces / schemas	не используются	—	—
+Test names	не применимо	—	—
+Branch names	не зафиксированы	—	—
+Style Do / Don't
 Do:
 
-- использовать имена, отражающие назначение;
-- сохранять модули связными и целенаправленными;
-- следовать уже существующим паттернам в проекте;
-- писать комментарии к секциям на русском языке;
-- использовать CSS-переменные из палитры `:root` для новых стилей.
+использовать имена, отражающие назначение;
+
+сохранять модули связными и целенаправленными;
+
+следовать уже существующим паттернам в проекте;
+
+писать комментарии к секциям на русском языке;
+
+использовать CSS-переменные из палитры :root для новых стилей.
 
 Don't:
 
-- создавать «utils»-свалки для несвязанной логики;
-- смешивать стили именования в одной области;
-- скрывать важные побочные эффекты за расплывчатыми именами хелперов;
-- вводить широкие абстракции до появления второго реального кейса.
+создавать «utils»-свалки для несвязанной логики;
 
----
+смешивать стили именования в одной области;
 
-## Preferred Patterns And Reference Implementations
+скрывать важные побочные эффекты за расплывчатыми именами хелперов;
 
-### Good Examples To Copy
+вводить широкие абстракции до появления второго реального кейса.
 
-- `app.py:16-20` (`url_with_timestamp`): хороший пример хелпера для кэш-брейкинга статики — чистый, без побочных эффектов.
-- `templates/base.html`: эталонная структура базового шаблона с подключением CSS через `url_with_timestamp`.
-- `templates/_game.html:34-109`: хороший пример инлайн-JS с анимацией на `requestAnimationFrame` и формой захвата лида.
-- `templates/_header.html`: пример использования `url_with_timestamp` для логотипа в шаблоне.
+Preferred Patterns And Reference Implementations
+Good Examples To Copy
+app.py:16-20 (url_with_timestamp): хороший пример хелпера для кэш-брейкинга статики — чистый, без побочных эффектов.
 
-### Patterns To Avoid Copying
+templates/base.html: эталонная структура базового шаблона с подключением CSS через url_with_timestamp.
 
-- `response.html`: это пререндеренный снапшот, не шаблон. Не редактировать вручную — он перегенерируется из шаблонов.
-- `шаблон AGENTS.md`: исходный шаблон с плейсхолдерами. Не использовать как справочник — актуальный файл: `AGENTS.md`.
+templates/_game.html:34-109: хороший пример инлайн-JS с анимацией на requestAnimationFrame и формой захвата лида.
 
----
+static/js/lightning.js: эталонный код генерации молний на canvas с затуханием и ограничением количества.
 
-## Data, Contracts, Codegen, And Migrations
+Patterns To Avoid Copying
+response.html: это пререндеренный снапшот, не шаблон. Не редактировать вручную — он перегенерируется из шаблонов.
 
-- Schema location: не применимо (нет БД)
-- Migration location: не применимо
-- API contract location: `app.py` (роуты определены в коде)
-- Event contract location: не применимо
-- Generated code location: не применимо
-- Regeneration command: не применимо
+Использование <img> для неонового льва — всегда использовать пустой <div> с background-image и mix-blend-mode: screen !important.
 
-### Rules
+Hero Section: Neon Lion & Lightning (Critical)
+Правильная структура в _hero.html
+html
+<div class="hero-neon-container">
+    <canvas id="lightning-canvas"></canvas>
+    <div class="hero__lion"></div>
+</div>
+Никогда не использовать <img src="lion-neon.jpg">. Только <div class="hero__lion"> с background-image.
 
-- Единственный API-контракт — `POST /api/chat` (заглушка). При расширении API — документировать в `app.py`.
-- `response.html` — генерируется сервером. Не редактировать вручную.
+Canvas должен быть перед львом в DOM, чтобы физически находиться под ним (z-index: 1 у canvas, z-index: 2 у льва).
 
----
+Правильные CSS-стили
+В .hero (корневой контейнер):
 
-## Security And Safety Boundaries
+css
+.hero {
+    position: relative;
+    overflow: visible;          /* чтобы молнии не обрезались */
+    isolation: isolate;         /* создаёт новый stacking context для mix-blend-mode */
+    background: url('../assets/bg-loft.png') center / cover no-repeat;
+}
+Никогда не удаляйте z-index у .hero .container — это сломает видимость текста и кнопок.
 
-### Hard Rules
+В .hero__lion:
 
-- Never commit secrets, private keys, access tokens, or production credentials.
-- Never hardcode secrets in source code, tests, fixtures, or documentation.
-- Redact sensitive values in logs and examples.
-- Validate and sanitize untrusted input at the proper boundary.
-- Use least privilege for database, cloud, and service credentials.
-- Be extra careful in code touching auth, billing, PII, legal/compliance, infrastructure, or permissions.
+css
+.hero__lion {
+    background-image: url('../assets/lion-neon.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    mix-blend-mode: screen !important;   /* убирает чёрный фон */
+    filter: none !important;              /* сбрасывает возможные тени */
+    opacity: 0.85;
+}
+В #lightning-canvas:
 
-### Human Approval Required Before
+css
+#lightning-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    isolation: isolate;   /* изолирует canvas от blend-режимов */
+}
+Правильная логика молний (lightning.js)
+Эпицентр: cy = height * 0.33 (голова льва находится в верхней трети).
 
-- deleting data or files;
-- applying irreversible migrations;
-- changing auth or permission logic;
-- changing billing or payment flows;
-- changing deployment or production infrastructure;
-- installing or replacing major dependencies;
-- rotating secrets or changing security configuration.
+Использовать неоновые цвета: #00f0ff и #ff2d75.
 
-### Sensitive Areas
+shadowBlur = 30 для основного разряда, 18 для ответвлений.
 
-- Authentication / authorization: отсутствует (открытый лендинг)
-- Payments / billing: отсутствует
-- Personal or regulated data: формы захвата лидов (`_game.html:21-26`) — имя, телефон, email. Передаются через `POST /api/chat` (заглушка). При реализации отправки — обеспечить HTTPS и защиту персональных данных.
-- Production configuration / infrastructure: не настроено
+MAX_BOLTS = 20, SPAWN_INTERVAL = 80 мс.
 
----
+Молнии должны затухать через уменьшение globalAlpha.
 
-## Git, PR, And Definition Of Done
+Что ломает mix-blend-mode (избегать):
+overflow: hidden на родителе (overflow должен быть visible).
 
-- Branch naming convention: не зафиксированы
-- Commit message convention: не зафиксированы
-- PR title convention: не зафиксированы
-- Changelog policy: не ведётся
-- Release notes policy: не применимо
+filter или transform на родительских блоках.
 
-### Definition Of Done
+z-index на промежуточных контейнерах без isolation: isolate.
 
+Использование isolation: isolate на самом льве (не нужно, он должен блендиться с фоном).
+
+Адаптивность для мобильных устройств (<768px)
+На мобильных устройствах блок со львом должен:
+
+Сменить position: absolute на relative.
+
+Сбросить right, top.
+
+Уменьшиться с 550px до 320px.
+
+Центрироваться по горизонтали через margin: 0 auto.
+
+css
+@media (max-width: 768px) {
+    .hero-neon-container {
+        position: relative;
+        right: auto;
+        top: auto;
+        width: 320px;
+        height: 320px;
+        margin: 20px auto 0;
+    }
+    .hero .container {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+Data, Contracts, Codegen, And Migrations
+Schema location: не применимо (нет БД)
+
+Migration location: не применимо
+
+API contract location: app.py (роуты определены в коде)
+
+Event contract location: не применимо
+
+Generated code location: не применимо
+
+Regeneration command: не применимо
+
+Rules
+Единственный API-контракт — POST /api/chat (заглушка). При расширении API — документировать в app.py.
+
+response.html — генерируется сервером. Не редактировать вручную.
+
+Security And Safety Boundaries
+Hard Rules
+Never commit secrets, private keys, access tokens, or production credentials.
+
+Never hardcode secrets in source code, tests, fixtures, or documentation.
+
+Redact sensitive values in logs and examples.
+
+Validate and sanitize untrusted input at the proper boundary.
+
+Use least privilege for database, cloud, and service credentials.
+
+Be extra careful in code touching auth, billing, PII, legal/compliance, infrastructure, or permissions.
+
+Human Approval Required Before
+deleting data or files;
+
+applying irreversible migrations;
+
+changing auth or permission logic;
+
+changing billing or payment flows;
+
+changing deployment or production infrastructure;
+
+installing or replacing major dependencies;
+
+rotating secrets or changing security configuration.
+
+Sensitive Areas
+Authentication / authorization: отсутствует (открытый лендинг)
+
+Payments / billing: отсутствует
+
+Personal or regulated data: формы захвата лидов (_game.html:21-26) — имя, телефон, email. Передаются через POST /api/chat (заглушка). При реализации отправки — обеспечить HTTPS и защиту персональных данных.
+
+Production configuration / infrastructure: не настроено
+
+Git, PR, And Definition Of Done
+Branch naming convention: не зафиксированы
+
+Commit message convention: не зафиксированы
+
+PR title convention: не зафиксированы
+
+Changelog policy: не ведётся
+
+Release notes policy: не применимо
+
+Definition Of Done
 A change is not complete until:
 
-1. страница открывается в браузере по `http://127.0.0.1:8000` без ошибок;
-2. консоль браузера не содержит JS-ошибок и 404;
-3. стили и вёрстка соответствуют макету (визуальная проверка);
-4. file placement and naming follow this document;
-5. assumptions, risks, and follow-up work are documented.
+страница открывается в браузере по http://127.0.0.1:8000 без ошибок;
 
----
+консоль браузера не содержит JS-ошибок и 404;
 
-## Monorepo Guidance
+стили и вёрстка соответствуют макету (визуальная проверка);
 
-Не применимо — проект является монолитным лендингом. При разделении на несколько сервисов — создать вложенные `AGENTS.md` по схеме из шаблона.
+file placement and naming follow this document;
 
----
+assumptions, risks, and follow-up work are documented.
 
-## Known Pitfalls
+Monorepo Guidance
+Не применимо — проект является монолитным лендингом. При разделении на несколько сервисов — создать вложенные AGENTS.md по схеме из шаблона.
 
-- **Кэш Jinja2 отключён** (`templates.env.cache = None` в `app.py:26`). Не включать обратно — Jinja2 3.1.6 имеет баг с нехешируемым ключом при включённом кэше.
-- **`requirements.txt` отсутствует**. При добавлении новых зависимостей — создать `requirements.txt` через `pip freeze > requirements.txt` и закоммитить.
-- **`static/js/main.js` не существует**, хотя `base.html` на него ссылается. Не создавать файл без явной задачи — скрипты пока инлайн в шаблонах. При переносе JS в отдельный файл — создать `static/js/main.js` и убрать инлайн-код.
-- **`response.html`** — снапшот, не шаблон. Не редактировать вручную. При изменении шаблонов — снапшот обновится сам при следующем запросе к серверу, либо пересоздать вручную через браузер (File → Save As).
-- **Не трогать `app.py` без явной задачи** — он настроен, работает, и любые изменения могут сломать рендеринг или кэш-брейкинг.
+Known Pitfalls
+Кэш Jinja2 отключён (templates.env.cache = None в app.py:26). Не включать обратно — Jinja2 3.1.6 имеет баг с нехешируемым ключом при включённом кэше.
 
----
+requirements.txt отсутствует. При добавлении новых зависимостей — создать requirements.txt через pip freeze > requirements.txt и закоммитить.
 
-## When The Agent Must Stop And Ask
+Порт 8000 — всегда проверять по http://127.0.0.1:8000.
 
+Чёрный фон льва не исчезает, если:
+
+используется <img> вместо div с background-image;
+
+у .hero нет isolation: isolate;
+
+у .hero стоит overflow: hidden (нужно visible);
+
+на .hero__lion нет !important у mix-blend-mode;
+
+на родительских блоках есть filter или transform, создающие новый контекст наложения.
+
+Агент не должен запускать сервер или выполнять ls/cd в терминале, где уже запущен сервер — это вызывает конфликт и зависание. Сервер запускается вручную разработчиком в отдельном терминале.
+
+When The Agent Must Stop And Ask
 The agent should pause and ask a human when:
 
-- requirements are ambiguous and there are multiple valid implementations;
-- a change may break API compatibility, data compatibility, or deployment safety;
-- documentation and code materially disagree;
-- tests fail for reasons unrelated to the task and the cause is unclear;
-- the task requires secrets, production access, or product-policy decisions;
-- the safest path depends on a tradeoff the user has not chosen.
+requirements are ambiguous and there are multiple valid implementations;
 
----
+a change may break API compatibility, data compatibility, or deployment safety;
 
-## Optional Cross-Tool Alignment
+documentation and code materially disagree;
 
+tests fail for reasons unrelated to the task and the cause is unclear;
+
+the task requires secrets, production access, or product-policy decisions;
+
+the safest path depends on a tradeoff the user has not chosen.
+
+Optional Cross-Tool Alignment
 If this repository also uses tool-specific AI instruction files, keep them aligned:
 
-- `README.md`
-- `.github/copilot-instructions.md`
-- `CLAUDE.md`
-- `.cursorrules`
-- `.aider.conf.yml`
-- `.gemini/settings.json`
+README.md
+
+.github/copilot-instructions.md
+
+CLAUDE.md
+
+.cursorrules
+
+.aider.conf.yml
+
+.gemini/settings.json
 
 Prefer one authoritative source and mirror only the minimum necessary.
 
+Maintenance Checklist For Humans
+Update this file whenever the architecture, stack, commands, or workflow change.
+
+Keep commands executable exactly as written.
+
+Replace vague placeholders with real values before rollout.
+
+Add links to the best in-repo examples for common tasks.
+
+Split this file into nested AGENTS.md files when one file becomes too broad.
+
+Adoption Checklist
+☑ All placeholder values in <angle_brackets> replaced;
+☑ All example values copied from template replaced;
+☑ All generic commands replaced with real commands;
+☑ All generic paths replaced with real paths;
+☑ All abstract rules replaced with project-specific rules;
+☑ Project overview included;
+☑ Stack and versions included;
+☑ Architecture and boundaries included;
+☑ Repository structure included;
+☑ Exact setup/build/test commands included;
+☑ Test locations and execution strategy included;
+☑ Naming conventions included;
+☑ Good and bad in-repo examples included;
+☑ Security boundaries included;
+☑ Escalation rules included;
+☑ Links to source-of-truth documentation included.
+text
+
 ---
-
-## Maintenance Checklist For Humans
-
-- Update this file whenever the architecture, stack, commands, or workflow change.
-- Keep commands executable exactly as written.
-- Replace vague placeholders with real values before rollout.
-- Add links to the best in-repo examples for common tasks.
-- Split this file into nested `AGENTS.md` files when one file becomes too broad.
-
----
-
-## Adoption Checklist
-
-- [x] All placeholder values in `<angle_brackets>` replaced;
-- [x] All example values copied from template replaced;
-- [x] All generic commands replaced with real commands;
-- [x] All generic paths replaced with real paths;
-- [x] All abstract rules replaced with project-specific rules;
-- [x] Project overview included;
-- [x] Stack and versions included;
-- [x] Architecture and boundaries included;
-- [x] Repository structure included;
-- [x] Exact setup/build/test commands included;
-- [x] Test locations and execution strategy included;
-- [x] Naming conventions included;
-- [x] Good and bad in-repo examples included;
-- [x] Security boundaries included;
-- [x] Escalation rules included;
-- [x] Links to source-of-truth documentation included.

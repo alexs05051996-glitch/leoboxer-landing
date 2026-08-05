@@ -1,27 +1,26 @@
 /**
- * Динамический эффект молний на hero-экране
- * Рисует ломаные линии (молнии) синего (#00f0ff) и розового (#ff2d75) цветов.
- * Молнии появляются случайно из центральной области, разлетаются в стороны и затухают.
- * Не более 15 одновременных молний.
- * Использует requestAnimationFrame для анимации.
- * Canvas адаптируется под размер родительского блока (ResizeObserver).
+ * Эффект молний на hero-экране
+ * Рисует ветвистые электрические разряды, вылетающие из центра головы льва
+ * во все стороны. Молнии имеют неоновое свечение и быстро затухают.
+ * Использует requestAnimationFrame для 60 FPS.
+ * Canvas привязан к контейнеру .hero-neon-container через ResizeObserver.
  */
 (function () {
     'use strict';
 
-    var canvas = document.getElementById('lightningCanvas');
+    var canvas = document.getElementById('lightning-canvas');
     if (!canvas) return;
 
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    var wrapper = canvas.parentElement;
-    if (!wrapper) return;
+    var container = canvas.parentElement;
+    if (!container) return;
 
     var W, H;
 
     /** Максимальное количество одновременных молний */
-    var MAX_BOLTS = 15;
+    var MAX_BOLTS = 20;
 
     /** Массив активных молний */
     var bolts = [];
@@ -29,17 +28,17 @@
     /** ID анимационного фрейма */
     var animFrameId = null;
 
-    /** Время последнего спавна молнии */
+    /** Время последнего спавна молнии (ms) */
     var lastSpawn = 0;
 
     /** Минимальный интервал между спавнами (ms) */
-    var SPAWN_INTERVAL = 200;
+    var SPAWN_INTERVAL = 80;
 
     // ==========================================
-    // Resize — подгоняем canvas под размер wrapper
+    // Resize — подгоняем canvas под размер контейнера
     // ==========================================
     function resize() {
-        var rect = wrapper.getBoundingClientRect();
+        var rect = container.getBoundingClientRect();
         var dpr = window.devicePixelRatio || 1;
         W = rect.width;
         H = rect.height;
@@ -51,7 +50,7 @@
     }
 
     var ro = new ResizeObserver(resize);
-    ro.observe(wrapper);
+    ro.observe(container);
     resize();
 
     // ==========================================
@@ -66,9 +65,9 @@
     }
 
     /**
-     * Генерирует точки ломаной линии молнии
-     * @param {number} x0 - начальная X
-     * @param {number} y0 - начальная Y
+     * Генерирует точки основной ломаной линии молнии
+     * @param {number} x0 - начальная X (центр холста)
+     * @param {number} y0 - начальная Y (центр холста)
      * @param {number} angle - направление в радианах
      * @param {number} length - общая длина молнии
      * @param {number} segments - количество сегментов
@@ -79,7 +78,7 @@
         var segLen = length / segments;
         var dx = Math.cos(angle);
         var dy = Math.sin(angle);
-        var spread = 0.4; // разброс отклонения
+        var spread = 0.35;
 
         for (var i = 1; i <= segments; i++) {
             var prev = points[i - 1];
@@ -94,37 +93,83 @@
     }
 
     /**
-     * Создаёт новую молнию
+     * Генерирует ответвления (дочерние молнии) от основной линии
+     * @param {Array} parentPoints - точки родительской молнии
+     * @param {number} branchCount - количество ответвлений
+     * @returns {Array<Array<{x: number, y: number}>>}
+     */
+    function generateBranches(parentPoints, branchCount) {
+        var branches = [];
+        var parentLen = parentPoints.length;
+
+        for (var b = 0; b < branchCount; b++) {
+            // Выбираем случайную точку на родительской молнии (не первую)
+            var idx = randInt(1, parentLen - 1);
+            var start = parentPoints[idx];
+
+            // Направление ответвления — отклоняемся от основного направления
+            var branchAngle = rand(-Math.PI * 0.4, Math.PI * 0.4);
+            var branchLen = rand(20, 60);
+            var branchSegments = randInt(2, 5);
+            var segLen = branchLen / branchSegments;
+            var dx = Math.cos(branchAngle);
+            var dy = Math.sin(branchAngle);
+            var spread = 0.3;
+
+            var branchPoints = [{ x: start.x, y: start.y }];
+            for (var i = 1; i <= branchSegments; i++) {
+                var prev = branchPoints[i - 1];
+                var ox = rand(-segLen * spread, segLen * spread);
+                var oy = rand(-segLen * spread, segLen * spread);
+                branchPoints.push({
+                    x: prev.x + dx * segLen + ox,
+                    y: prev.y + dy * segLen + oy
+                });
+            }
+
+            branches.push(branchPoints);
+        }
+
+        return branches;
+    }
+
+    /**
+     * Создаёт новую молнию с ответвлениями
      */
     function createBolt() {
         if (bolts.length >= MAX_BOLTS) return;
 
         var cx = W * 0.5;
-        var cy = H * 0.5;
+        var cy = H * 0.33;
 
-        // Случайное направление (все стороны)
+        // Случайное направление — во все стороны
         var angle = rand(0, Math.PI * 2);
-        // Длина молнии — от 30% до 70% от диагонали
+        // Длина молнии — от 40% до 80% от диагонали холста
         var maxDist = Math.sqrt(W * W + H * H);
-        var length = rand(maxDist * 0.3, maxDist * 0.7);
-        var segments = randInt(6, 14);
+        var length = rand(maxDist * 0.4, maxDist * 0.8);
+        var segments = randInt(8, 16);
 
         var points = generateBoltPoints(cx, cy, angle, length, segments);
 
-        // Цвет: синий или розовый
+        // Ответвления (0–3 штуки)
+        var branchCount = randInt(0, 3);
+        var branches = generateBranches(points, branchCount);
+
+        // Цвет: синий (60%) или розовый (40%)
         var color = Math.random() < 0.6 ? '#00f0ff' : '#ff2d75';
 
-        // Толщина линии
-        var lineWidth = rand(1.5, 4);
+        // Толщина основной линии
+        var lineWidth = rand(1.5, 3.5);
 
-        // Прозрачность (затухание)
-        var opacity = rand(0.6, 1.0);
+        // Начальная прозрачность
+        var opacity = rand(0.7, 1.0);
 
-        // Скорость затухания (уменьшение opacity в секунду)
-        var fadeSpeed = rand(0.8, 2.0);
+        // Скорость затухания (уменьшение opacity в секунду) — быстрое
+        var fadeSpeed = rand(1.5, 3.5);
 
         bolts.push({
             points: points,
+            branches: branches,
             color: color,
             lineWidth: lineWidth,
             opacity: opacity,
@@ -141,14 +186,16 @@
 
         for (var i = bolts.length - 1; i >= 0; i--) {
             var bolt = bolts[i];
-            var pts = bolt.points;
 
             if (bolt.opacity <= 0) {
                 bolts.splice(i, 1);
                 continue;
             }
 
+            // Основная линия
+            ctx.save();
             ctx.beginPath();
+            var pts = bolt.points;
             ctx.moveTo(pts[0].x, pts[0].y);
             for (var j = 1; j < pts.length; j++) {
                 ctx.lineTo(pts[j].x, pts[j].y);
@@ -159,10 +206,36 @@
             ctx.lineWidth = bolt.lineWidth;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.stroke();
 
-            // Сброс
-            ctx.globalAlpha = 1;
+            // Неоновое свечение
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = bolt.color;
+
+            ctx.stroke();
+            ctx.restore();
+
+            // Ответвления
+            for (var b = 0; b < bolt.branches.length; b++) {
+                var branch = bolt.branches[b];
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(branch[0].x, branch[0].y);
+                for (var k = 1; k < branch.length; k++) {
+                    ctx.lineTo(branch[k].x, branch[k].y);
+                }
+
+                ctx.strokeStyle = bolt.color;
+                ctx.globalAlpha = bolt.opacity * 0.7;
+                ctx.lineWidth = bolt.lineWidth * 0.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = bolt.color;
+
+                ctx.stroke();
+                ctx.restore();
+            }
         }
     }
 
@@ -181,8 +254,8 @@
         lastSpawn += dt * 1000;
         if (lastSpawn >= SPAWN_INTERVAL) {
             lastSpawn = 0;
-            // Случайное количество: 1–3
-            var count = randInt(1, 3);
+            // Случайное количество: 1–2
+            var count = randInt(1, 2);
             for (var k = 0; k < count; k++) {
                 createBolt();
             }
