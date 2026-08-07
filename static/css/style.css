@@ -137,8 +137,6 @@ body {
     display: flex;
     align-items: center;
     background: url('../assets/bg-loft.png') center / cover no-repeat;
-    overflow: visible;         /* чтобы молнии не обрезались */
-    isolation: isolate;        /* для mix-blend-mode */
     padding: 80px 5% 60px;
 }
 
@@ -158,7 +156,7 @@ body {
 .hero__container {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 40px;
     width: 100%;
@@ -170,7 +168,7 @@ body {
 
 /* Левая часть — текст */
 .hero__content {
-    flex: 1 1 45%;
+    flex: 1;
     min-width: 280px;
     color: #fff;
 }
@@ -195,70 +193,39 @@ body {
     margin-bottom: 30px;
 }
 
-/* Правая часть — блок с визуалом */
-.hero__visual {
-    flex: 1 1 45%;
-    min-width: 280px;
+/* ==========================================
+    ПРАВАЯ КОЛОНКА HERO: КОНТАКТЫ + СИЛОМЕР
+    ========================================== */
+.hero__right {
     display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.hero__visual-inner {
-    position: relative;
-    width: 100%;
-    max-width: 550px;           /* макс. размер на десктопе */
-    aspect-ratio: 1 / 1;        /* квадрат */
-    overflow: visible;
-}
-
-/* Canvas и лев внутри visual-inner */
-#lightning-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
-    isolation: isolate;
-}
-
-.hero__lion {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('../assets/lion-neon.jpg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    z-index: 2;
-    mix-blend-mode: screen !important;
-    opacity: 0.85;
-    filter: none !important;
-    animation: lionBreathe 4s ease-in-out infinite;
-}
-
-@keyframes lionBreathe {
-    0%, 100% {
-        transform: scale(0.98);
-    }
-    50% {
-        transform: scale(1.02);
-    }
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    flex: 0 0 auto;
+    min-width: 280px;
 }
 
 /* ==========================================
-   HERO-БЛОК: ТЕЛЕФОН И ИКОНКИ МЕССЕНДЖЕРОВ
-   ========================================== */
+    ИЗОБРАЖЕНИЕ СИЛОМЕРА В ПРАВОЙ КОЛОНКЕ
+    ========================================== */
+.hero__puncher {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.8));
+}
+
+/* ==========================================
+    HERO-БЛОК: ТЕЛЕФОН И ИКОНКИ МЕССЕНДЖЕРОВ
+    ========================================== */
 .hero-contacts {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
     gap: 0;
     margin-top: 20px;
+    margin-bottom: 20px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 16px;
     padding: 12px 20px;
@@ -282,7 +249,7 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 .hero-contacts-icon {
@@ -424,29 +391,16 @@ body {
 @media (max-width: 1024px) {
     .hero__container {
         gap: 30px;
+        justify-content: center;
     }
 
-    .hero__content,
-    .hero__visual {
+    .hero__content {
         flex: 1 1 100%;
         text-align: center;
     }
 
-    .hero__visual-inner {
-        max-width: 420px;
-    }
-
-    .hero__content {
-        order: 1;
-    }
-
-    .hero__visual {
-        order: 2;
-    }
-
-    .hero-contacts {
-        margin-left: auto;
-        margin-right: auto;
+    .hero__right {
+        align-items: center;
     }
 }
 
@@ -456,8 +410,34 @@ body {
         padding: 60px 5% 40px;
     }
 
-    .hero__visual-inner {
-        max-width: 320px;
+    .hero__container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero__content {
+        order: 1;
+        flex: 1 1 100%;
+        text-align: center;
+        width: 100%;
+    }
+
+    .hero__right {
+        order: 2;
+        align-items: center;
+        width: 100%;
+    }
+
+    .hero__puncher {
+        order: 1;
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    .hero-contacts {
+        order: 2;
+        text-align: center;
+        align-items: center;
     }
 
     .hero__content h1 {
@@ -482,6 +462,10 @@ body {
         height: 24px;
     }
 
+    .btn-hero-cta {
+        width: 100%;
+    }
+
     .neon-number {
         font-size: 1.8rem;
         text-shadow:
@@ -493,10 +477,6 @@ body {
 
 /* Очень маленькие экраны (<480px) */
 @media (max-width: 480px) {
-    .hero__visual-inner {
-        max-width: 260px;
-    }
-
     .hero__content h1 {
         font-size: 26px;
     }
@@ -529,11 +509,100 @@ body {
         height: 24px;
     }
 
+    .hero__puncher {
+        max-width: 90%;
+    }
+
     .neon-number {
         font-size: 1.5rem;
         text-shadow:
             0 0 4px var(--neon-pink),
             0 0 12px var(--neon-pink),
             0 0 24px var(--neon-pink);
+    }
+}
+
+/* ==========================================
+   ПРЕИМУЩЕСТВА ФРАНШИЗЫ (4 ИКОНКИ)
+   Внутри hero, на кирпичном фоне
+   ========================================== */
+.advantages__grid {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 30px;
+    width: 100%;
+    /* Ограничиваем ширину ряда: он не заезжает под платформу силомера */
+    max-width: 750px;
+    /* Отступ сверху от кнопки и выравнивание по началу текста в glass-card */
+    margin: 30px 0 0 30px;
+}
+
+.advantages__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+}
+
+.advantages__icon {
+    max-height: 100px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.advantages__label {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+/* Планшеты: сетка 2x2, центрирование ряда */
+@media (max-width: 1024px) {
+    .advantages__grid {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Планшеты: сетка 2x2 */
+@media (max-width: 768px) {
+    .advantages__grid {
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+
+    .advantages__item {
+        flex: 1 1 calc(50% - 30px);
+        min-width: 200px;
+    }
+}
+
+/* Смартфоны: вертикальный ряд 1x4 */
+@media (max-width: 480px) {
+    .advantages__grid {
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .advantages__item {
+        flex: 1 1 100%;
+        max-width: 280px;
+    }
+
+    .advantages__icon {
+        max-height: 80px;
+    }
+
+    .advantages__label {
+        font-size: 16px;
     }
 }

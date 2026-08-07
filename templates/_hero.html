@@ -1,7 +1,7 @@
-<!-- Главный экран: две колонки с заголовком, CTA и изображением силомера -->
+<!-- Главный экран: текст + контакты на фоне кирпичной стены -->
 <section id="hero" class="hero">
     <div class="container hero__container">
-        <!-- Левая часть: текст, УТП, контакты, кнопка -->
+        <!-- Левая колонка: текст, УТП, кнопка -->
         <div class="hero__content">
             <div class="glass-card">
                 <h1>
@@ -14,7 +14,12 @@
                 <button class="btn-hero-cta">Получить бизнес-план</button>
                 <span class="hero-footnote">*на основе средней выручки действующих партнеров сети</span>
             </div>
-            <!-- Блок контактов: телефон, мессенджеры, строка дохода -->
+            {% include '_advantages.html' %}
+        </div>
+
+        <!-- Правая колонка: контакты + силомер -->
+        <div class="hero__right">
+            <!-- Блок контактов: телефон, мессенджеры -->
             <div class="hero-contacts">
                 <a href="tel:89999999999" class="hero-contacts-phone">8 (999) 999-99-99</a>
                 <div class="hero-contacts-icons">
@@ -28,16 +33,8 @@
                         <img src="{{ url_with_timestamp('assets/Логотип_MAX.svg') }}" alt="Макс" width="28" height="28">
                     </a>
                 </div>
-                <div class="micro-text">Один удар = 150 ₽ дохода</div>
             </div>
-        </div>
-
-        <!-- Правая часть: блок со львом и canvas -->
-        <div class="hero__visual">
-            <div class="hero__visual-inner">
-                <canvas id="lightning-canvas"></canvas>
-                <div class="hero__lion"></div>
-            </div>
+            <img src="{{ url_with_timestamp('assets/puncher.png') }}" alt="Силомер ЛЕО БОКСЕР" class="hero__puncher">
         </div>
     </div>
 </section>
