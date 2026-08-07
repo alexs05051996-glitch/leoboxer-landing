@@ -105,7 +105,7 @@ Do not write "latest". Use exact versions or supported ranges.
 | Backend | Jinja2 | 3.1.6 | Серверный рендеринг шаблонов | Кэш шаблонов отключён из-за бага с нехешируемым ключом |
 | Backend | python-multipart | 0.x | Парсинг форм (для будущих POST-эндпоинтов) | Точная версия не зафиксирована |
 | Frontend | Vanilla CSS | — | Стили в `static/css/style.css` | Неоновая палитра: `--neon-blue: #00f0ff`, `--neon-pink: #ff2d75` |
-| Frontend | Vanilla JS | — | Интерактивность (геймификация, формы, молнии) | `static/js/main.js` и `static/js/lightning.js` |
+| Frontend | Vanilla JS | — | Интерактивность (геймификация, формы) | `static/js/main.js` |
 
 ### Version Policy
 
@@ -150,12 +150,10 @@ leoboxer-landing/
 │  ├─ css/
 │  │  └─ style.css         # Все стили лендинга (неоновая палитра)
 │  ├─ js/
-│  │  ├─ main.js           # Основной JS (интерактивность)
-│  │  └─ lightning.js      # Генерация молний на canvas (hero-экран)
+│  │  └─ main.js           # Основной JS (интерактивность)
 │  └─ assets/
 │     ├─ bg-loft.png       # Фоновое изображение hero-секции (кирпичи)
 │     ├─ logo.png          # Логотип «ЛЕО БОКСЕР»
-│     ├─ lion-neon.jpg     # Неоновый лев (чёрный фон, неоновые линии)
 │     ├─ telegram.svg
 │     ├─ WhatsApp.svg
 │     └─ Логотип_MAX.svg
@@ -163,7 +161,7 @@ leoboxer-landing/
    ├─ base.html            # Базовый шаблон: <head>, подключение CSS с кэш-брейкингом
    ├─ index.html           # Главная страница: extends base, включает все паршалы
    ├─ _header.html         # Парящая стеклянная шапка с логотипом и навигацией
-   ├─ _hero.html           # Главный экран с кирпичным фоном, неоновым львом и молниями
+   ├─ _hero.html           # Главный экран: кирпичный фон, текст, контакты
    ├─ _ai_chat.html        # Блок «Умный расчёт прибыли» с формой ИИ-чата
    ├─ _game.html           # Игровая механика: виртуальный удар + лид-форма (с инлайн-JS)
    ├─ _production.html     # Блок «Собственное производство» с галереей
@@ -173,7 +171,7 @@ leoboxer-landing/
    Directory Responsibilities
 Path	Responsibility	Typical Contents	Must Not Contain
 static/css/	Стили	style.css	Серверная логика, шаблоны
-static/js/	JavaScript-скрипты	main.js, lightning.js	CSS, изображения
+static/js/	JavaScript-скрипты	main.js	CSS, изображения
 static/assets/	Изображения, иконки, шрифты	*.png, *.jpg, *.svg	Код, стили
 templates/	Jinja2-шаблоны	base.html, index.html, паршалы _*.html	Статика, Python-код
 app.py	Роутинг, конфигурация шаблонов, хелперы	FastAPI app, url_with_timestamp, роуты	Шаблоны, статика
@@ -329,23 +327,31 @@ templates/base.html: эталонная структура базового ша
 
 templates/_game.html:34-109: хороший пример инлайн-JS с анимацией на requestAnimationFrame и формой захвата лида.
 
-static/js/lightning.js: эталонный код генерации молний на canvas с затуханием и ограничением количества.
-
 Patterns To Avoid Copying
 response.html: это пререндеренный снапшот, не шаблон. Не редактировать вручную — он перегенерируется из шаблонов.
 
-Использование <img> для неонового льва — всегда использовать пустой <div> с background-image и mix-blend-mode: screen !important.
+Hero Section (Critical)
+Hero-экран максимально простой: кирпичный фон (bg-loft.png), текстовый блок слева и контакты (телефон + иконки соцсетей) под текстом.
 
-Hero Section: Neon Lion & Lightning (Critical)
 Правильная структура в _hero.html
 html
-<div class="hero-neon-container">
-    <canvas id="lightning-canvas"></canvas>
-    <div class="hero__lion"></div>
-</div>
-Никогда не использовать <img src="lion-neon.jpg">. Только <div class="hero__lion"> с background-image.
-
-Canvas должен быть перед львом в DOM, чтобы физически находиться под ним (z-index: 1 у canvas, z-index: 2 у льва).
+<section id="hero" class="hero">
+    <div class="container hero__container">
+        <div class="hero__content">
+            <div class="glass-card">
+                <h1>...</h1>
+                <p class="hero-subtitle">...</p>
+                <button class="btn-hero-cta">Получить бизнес-план</button>
+                <span class="hero-footnote">...</span>
+            </div>
+            <div class="hero-contacts">
+                <a href="tel:..." class="hero-contacts-phone">8 (999) 999-99-99</a>
+                <div class="hero-contacts-icons">...</div>
+            </div>
+        </div>
+    </div>
+</section>
+Никаких canvas, львов, молний, mix-blend-mode и сложных визуальных эффектов на hero-экране.
 
 Правильные CSS-стили
 В .hero (корневой контейнер):
@@ -353,80 +359,30 @@ Canvas должен быть перед львом в DOM, чтобы физич
 css
 .hero {
     position: relative;
-    overflow: visible;          /* чтобы молнии не обрезались */
-    isolation: isolate;         /* создаёт новый stacking context для mix-blend-mode */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
     background: url('../assets/bg-loft.png') center / cover no-repeat;
+    padding: 80px 5% 60px;
 }
-Никогда не удаляйте z-index у .hero .container — это сломает видимость текста и кнопок.
+Не добавлять overflow: hidden, isolation: isolate, filter или transform на .hero — они не нужны и могут сломать отображение.
 
-В .hero__lion:
+Адаптивность
+На планшетах и мобильных (<1024px) текст и контакты центрируются:
 
 css
-.hero__lion {
-    background-image: url('../assets/lion-neon.jpg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    mix-blend-mode: screen !important;   /* убирает чёрный фон */
-    filter: none !important;              /* сбрасывает возможные тени */
-    opacity: 0.85;
-}
-В #lightning-canvas:
-
-css
-#lightning-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
-    isolation: isolate;   /* изолирует canvas от blend-режимов */
-}
-Правильная логика молний (lightning.js)
-Эпицентр: cy = height * 0.33 (голова льва находится в верхней трети).
-
-Использовать неоновые цвета: #00f0ff и #ff2d75.
-
-shadowBlur = 30 для основного разряда, 18 для ответвлений.
-
-MAX_BOLTS = 20, SPAWN_INTERVAL = 80 мс.
-
-Молнии должны затухать через уменьшение globalAlpha.
-
-Что ломает mix-blend-mode (избегать):
-overflow: hidden на родителе (overflow должен быть visible).
-
-filter или transform на родительских блоках.
-
-z-index на промежуточных контейнерах без isolation: isolate.
-
-Использование isolation: isolate на самом льве (не нужно, он должен блендиться с фоном).
-
-Адаптивность для мобильных устройств (<768px)
-На мобильных устройствах блок со львом должен:
-
-Сменить position: absolute на relative.
-
-Сбросить right, top.
-
-Уменьшиться с 550px до 320px.
-
-Центрироваться по горизонтали через margin: 0 auto.
-
-css
-@media (max-width: 768px) {
-    .hero-neon-container {
-        position: relative;
-        right: auto;
-        top: auto;
-        width: 320px;
-        height: 320px;
-        margin: 20px auto 0;
+@media (max-width: 1024px) {
+    .hero__container {
+        gap: 30px;
+        justify-content: center;
     }
-    .hero .container {
-        flex-direction: column;
+    .hero__content {
+        flex: 1 1 100%;
         text-align: center;
+    }
+    .hero-contacts {
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 Data, Contracts, Codegen, And Migrations
@@ -518,18 +474,6 @@ Known Pitfalls
 requirements.txt отсутствует. При добавлении новых зависимостей — создать requirements.txt через pip freeze > requirements.txt и закоммитить.
 
 Порт 8000 — всегда проверять по http://127.0.0.1:8000.
-
-Чёрный фон льва не исчезает, если:
-
-используется <img> вместо div с background-image;
-
-у .hero нет isolation: isolate;
-
-у .hero стоит overflow: hidden (нужно visible);
-
-на .hero__lion нет !important у mix-blend-mode;
-
-на родительских блоках есть filter или transform, создающие новый контекст наложения.
 
 Агент не должен запускать сервер или выполнять ls/cd в терминале, где уже запущен сервер — это вызывает конфликт и зависание. Сервер запускается вручную разработчиком в отдельном терминале.
 
