@@ -14,7 +14,6 @@
                 <button class="btn-hero-cta">Получить бизнес-план</button>
                 <span class="hero-footnote">*на основе средней выручки действующих партнеров сети</span>
             </div>
-            {% include '_advantages.html' %}
         </div>
 
         <!-- Правая колонка: контакты + силомер -->
@@ -34,7 +33,10 @@
                     </a>
                 </div>
             </div>
-            <img src="{{ url_with_timestamp('assets/puncher.png') }}" alt="Силомер ЛЕО БОКСЕР" class="hero__puncher">
+            <img src="{{ url_with_timestamp('assets/hero-punching-machine.png') }}" alt="Силомер ЛЕО БОКСЕР" class="hero__puncher">
         </div>
+
+        <!-- Преимущества: 4 иконки (последний ребёнок hero__container) -->
+        {% include '_advantages.html' %}
     </div>
 </section>

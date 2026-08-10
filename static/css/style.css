@@ -25,6 +25,10 @@
 body {
     font-family: 'Segoe UI', 'Arial', sans-serif;
     background-color: var(--bg-dark);
+    /* Сквозная карбоновая текстура для всех секций ниже первого экрана */
+    background-image: url('../assets/bg-carbon.png');
+    background-repeat: repeat;
+    background-size: auto;
     color: var(--text-light);
     line-height: 1.5;
     min-height: 100vh;
@@ -117,27 +121,43 @@ body {
 }
 
 /* ==========================================
+   ТЕЛЕФОН В ШАПКЕ
+   ========================================== */
+.header-phone {
+    display: none; /* скрыт на десктопе по умолчанию */
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    transition: color 0.25s ease;
+    flex-shrink: 0;
+}
+
+.header-phone:hover {
+    color: var(--neon-blue);
+}
+
+/* ==========================================
    СТЕКЛЯННАЯ КАРТОЧКА (GLASS MORPHISM)
    ========================================== */
 .glass-card {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
     border-radius: 20px;
     padding: 20px 30px;
 }
 
 /* ==========================================
-   HERO — ГИБКАЯ СЕКЦИЯ
-   ========================================== */
+    HERO — СЕТКА НА CSS GRID
+    ========================================== */
 .hero {
     position: relative;
     min-height: 100vh;
     display: flex;
     align-items: center;
     background: url('../assets/bg-loft.png') center / cover no-repeat;
-    padding: 80px 5% 60px;
+    padding: 80px 5% 0;
 }
 
 .hero::before {
@@ -153,24 +173,37 @@ body {
     pointer-events: none;
 }
 
+/* Мягкое затемнение нижнего края hero для плавного перехода к карбоновому фону */
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 140px;
+    background: linear-gradient(to bottom, transparent 35%, #000000 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
 .hero__container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto;
     gap: 40px;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     position: relative;
     z-index: 2;
+    align-items: start;
 }
 
 /* Левая часть — текст */
 .hero__content {
-    flex: 1;
-    min-width: 280px;
+    grid-column: 1;
+    grid-row: 1;
     color: #fff;
+    min-width: 0;
 }
 
 .hero__content h1 {
@@ -197,11 +230,12 @@ body {
     ПРАВАЯ КОЛОНКА HERO: КОНТАКТЫ + СИЛОМЕР
     ========================================== */
 .hero__right {
+    grid-column: 2;
+    grid-row: 1 / 3;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
     gap: 0;
-    flex: 0 0 auto;
     min-width: 280px;
 }
 
@@ -209,10 +243,19 @@ body {
     ИЗОБРАЖЕНИЕ СИЛОМЕРА В ПРАВОЙ КОЛОНКЕ
     ========================================== */
 .hero__puncher {
-    max-width: 100%;
-    height: auto;
+    height: 640px !important;
+    width: auto !important;
     display: block;
-    filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.8));
+    margin-top: -50px !important;
+    animation: neonBreath 6s ease-in-out infinite;
+    transition: all 0.5s ease;
+}
+
+/* Плавная премиум-анимация «дыхания» автомата-силомера */
+@keyframes neonBreath {
+    0% { transform: translateY(0); filter: drop-shadow(0 0 15px rgba(0, 162, 255, 0.3)); }
+    50% { transform: translateY(-10px); filter: drop-shadow(0 0 30px rgba(255, 0, 128, 0.6)); }
+    100% { transform: translateY(0); filter: drop-shadow(0 0 15px rgba(0, 162, 255, 0.3)); }
 }
 
 /* ==========================================
@@ -226,7 +269,7 @@ body {
     gap: 0;
     margin-top: 20px;
     margin-bottom: 20px;
-    background: rgba(0, 0, 0, 0.3);
+    background: transparent;
     border-radius: 16px;
     padding: 12px 20px;
 }
@@ -295,8 +338,8 @@ body {
 }
 
 /* ==========================================
-   КНОПКА CTA В HERO
-   ========================================== */
+    КНОПКА CTA В HERO
+    ========================================== */
 .btn-hero-cta {
     background: #111;
     color: #fff;
@@ -367,176 +410,20 @@ body {
 }
 
 /* ==========================================
-    АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ
+    ПРЕИМУЩЕСТВА ФРАНШИЗЫ (4 ИКОНКИ)
+    Внутри hero, на кирпичном фоне
     ========================================== */
-@media (max-width: 768px) {
-    .main-nav {
-        display: none;
-    }
-
-    .header-container {
-        justify-content: space-between;
-    }
-
-    .logo-text {
-        font-size: 1.2rem;
-    }
-}
-
-/* ==========================================
-    АДАПТИВНОСТЬ HERO
-    ========================================== */
-
-/* Планшеты и маленькие ноутбуки (768–1024px) */
-@media (max-width: 1024px) {
-    .hero__container {
-        gap: 30px;
-        justify-content: center;
-    }
-
-    .hero__content {
-        flex: 1 1 100%;
-        text-align: center;
-    }
-
-    .hero__right {
-        align-items: center;
-    }
-}
-
-/* Мобильные (<768px) */
-@media (max-width: 768px) {
-    .hero {
-        padding: 60px 5% 40px;
-    }
-
-    .hero__container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .hero__content {
-        order: 1;
-        flex: 1 1 100%;
-        text-align: center;
-        width: 100%;
-    }
-
-    .hero__right {
-        order: 2;
-        align-items: center;
-        width: 100%;
-    }
-
-    .hero__puncher {
-        order: 1;
-        max-width: 80%;
-        margin: 0 auto;
-    }
-
-    .hero-contacts {
-        order: 2;
-        text-align: center;
-        align-items: center;
-    }
-
-    .hero__content h1 {
-        font-size: 32px;
-    }
-
-    .hero-contacts-phone {
-        font-size: 28px;
-    }
-
-    .hero-contacts-icons {
-        gap: 12px;
-    }
-
-    .hero-contacts-icon {
-        width: 36px;
-        height: 36px;
-    }
-
-    .hero-contacts-icon img {
-        width: 24px;
-        height: 24px;
-    }
-
-    .btn-hero-cta {
-        width: 100%;
-    }
-
-    .neon-number {
-        font-size: 1.8rem;
-        text-shadow:
-            0 0 6px var(--neon-pink),
-            0 0 18px var(--neon-pink),
-            0 0 36px var(--neon-pink);
-    }
-}
-
-/* Очень маленькие экраны (<480px) */
-@media (max-width: 480px) {
-    .hero__content h1 {
-        font-size: 26px;
-    }
-
-    .btn-hero-cta {
-        width: 100%;
-        padding: 14px 20px;
-        font-size: 18px;
-    }
-
-    .hero-subtitle {
-        font-size: 16px;
-    }
-
-    .hero-contacts-phone {
-        font-size: 22px;
-    }
-
-    .hero-contacts-icons {
-        gap: 8px;
-    }
-
-    .hero-contacts-icon {
-        width: 36px;
-        height: 36px;
-    }
-
-    .hero-contacts-icon img {
-        width: 24px;
-        height: 24px;
-    }
-
-    .hero__puncher {
-        max-width: 90%;
-    }
-
-    .neon-number {
-        font-size: 1.5rem;
-        text-shadow:
-            0 0 4px var(--neon-pink),
-            0 0 12px var(--neon-pink),
-            0 0 24px var(--neon-pink);
-    }
-}
-
-/* ==========================================
-   ПРЕИМУЩЕСТВА ФРАНШИЗЫ (4 ИКОНКИ)
-   Внутри hero, на кирпичном фоне
-   ========================================== */
 .advantages__grid {
+    grid-column: 1;
+    grid-row: 2;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
     gap: 30px;
     width: 100%;
-    /* Ограничиваем ширину ряда: он не заезжает под платформу силомера */
     max-width: 750px;
-    /* Отступ сверху от кнопки и выравнивание по началу текста в glass-card */
-    margin: 30px 0 0 30px;
+    margin: 30px 0 20px 30px;
 }
 
 .advantages__item {
@@ -564,45 +451,369 @@ body {
     text-align: center;
 }
 
-/* Планшеты: сетка 2x2, центрирование ряда */
-@media (max-width: 1024px) {
-    .advantages__grid {
+/* ==========================================
+    АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ
+    ========================================== */
+@media (max-width: 768px) {
+    .site-header {
+        padding: 6px 14px;
+    }
+
+    .main-nav {
+        display: none;
+    }
+
+    .header-phone {
+        display: block;
         margin-left: auto;
+        text-align: right;
+        font-size: 0.85rem;
+    }
+
+    .header-container {
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .logo-link {
+        flex-shrink: 0;
+    }
+
+    .logo-img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .logo-text {
+        font-size: 1.1rem;
+    }
+}
+
+/* ==========================================
+    АДАПТИВНОСТЬ HERO
+    ========================================== */
+
+/* Планшеты и мелкие ноутбуки (768px – 1199px) */
+@media (max-width: 1199px) and (min-width: 768px) {
+    .hero__container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .hero__content {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .hero__right {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        align-items: center;
+    }
+
+    .hero__content h1 {
+        font-size: 34px;
+    }
+
+    .hero__puncher {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .advantages__grid {
+        grid-column: 1;
+        grid-row: 2;
+        margin-left: 0;
         margin-right: auto;
     }
 }
 
-/* Планшеты: сетка 2x2 */
-@media (max-width: 768px) {
-    .advantages__grid {
-        flex-wrap: wrap;
-        gap: 30px;
+/* Мобильные (≤767px) */
+@media (max-width: 767px) {
+    .header-phone {
+        display: none !important;
     }
 
-    .advantages__item {
-        flex: 1 1 calc(50% - 30px);
-        min-width: 200px;
+    .hero {
+        min-height: auto;
+        padding: 60px 5% 40px;
     }
-}
 
-/* Смартфоны: вертикальный ряд 1x4 */
-@media (max-width: 480px) {
-    .advantages__grid {
+    .hero__container {
+        display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: flex-start;
         gap: 24px;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero__content {
+        width: 100%;
+        text-align: center;
+    }
+
+    .hero__content h1 {
+        font-size: 23px;
+        line-height: 1.35;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .hero__right {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    /* Контакты идут первыми, силомер — вторым */
+    .hero-contacts {
+        order: 1;
+        text-align: center;
+        align-items: center;
+    }
+
+    .hero-contacts-phone {
+        font-size: 28px;
+    }
+
+    .hero-contacts-icons {
+        gap: 12px;
+    }
+
+    .hero-contacts-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hero-contacts-icon img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .hero__puncher {
+        order: 2;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .btn-hero-cta {
+        width: 100%;
+        max-width: 340px;
+    }
+
+    .neon-number {
+        font-size: 1.8rem;
+        text-shadow:
+            0 0 6px var(--neon-pink),
+            0 0 18px var(--neon-pink),
+            0 0 36px var(--neon-pink);
+    }
+
+    /* Преимущества: сетка 2×2 (два в ряд, два ряда) */
+    .advantages__grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+        margin: 20px auto 0;
+        max-width: 400px;
     }
 
     .advantages__item {
-        flex: 1 1 100%;
-        max-width: 280px;
+        flex: 0 0 calc(50% - 16px);
+        max-width: 160px;
+        gap: 12px;
     }
 
     .advantages__icon {
-        max-height: 80px;
+        max-height: 70px;
     }
 
     .advantages__label {
-        font-size: 16px;
+        font-size: 14px;
+    }
+}
+
+/* Очень маленькие экраны (≤480px) */
+@media (max-width: 480px) {
+    .hero__content h1 {
+        font-size: 22px;
+        line-height: 1.35;
+    }
+
+    .btn-hero-cta {
+        width: 100%;
+        max-width: 340px;
+        padding: 14px 20px;
+        font-size: 18px;
+    }
+
+    .hero-subtitle {
+        font-size: 15px;
+    }
+
+    .hero-contacts-phone {
+        font-size: 22px;
+    }
+
+    .hero-contacts-icons {
+        gap: 8px;
+    }
+
+    .hero-contacts-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hero-contacts-icon img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .hero__puncher {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .neon-number {
+        font-size: 1.5rem;
+        text-shadow:
+            0 0 4px var(--neon-pink),
+            0 0 12px var(--neon-pink),
+            0 0 24px var(--neon-pink);
+    }
+
+    .advantages__item {
+        flex: 0 0 calc(50% - 16px);
+        max-width: 140px;
+    }
+
+    .advantages__icon {
+        max-height: 60px;
+    }
+
+    .advantages__label {
+        font-size: 13px;
+    }
+}
+
+/* ==========================================
+   БЛОК КАЛЬКУЛЯТОРА ПРИБЫЛИ (AI CHAT) — ПРОЗРАЧНЫЙ ФОН
+   ========================================== */
+.ai-chat-section {
+    background: transparent;
+}
+
+/* ==========================================
+   СПЕЦИАЛЬНОЕ ПРЕДЛОЖЕНИЕ (B2B OFFER)
+   Изолированный блок под hero-секцией.
+   Все стили — только через префикс .b2b-offer-*
+   ========================================== */
+.b2b-offer-section {
+    background: transparent;
+    padding: 0 5% 40px;
+}
+
+.b2b-offer-card {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #1a1a1e;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    padding: 32px 40px;
+}
+
+.b2b-offer-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.b2b-offer-title {
+    font-family: var(--font-cyber);
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.b2b-offer-subtitle {
+    font-size: 16px;
+    color: #b0b3bd;
+    line-height: 1.5;
+}
+
+/* Кнопка «Получить оффер» — синхронизирована с главной кнопкой
+   «Получить бизнес-план» (matte black, неоновое свечение, wobble) */
+.b2b-offer-btn {
+    flex-shrink: 0;
+    background: #111;
+    color: #fff;
+    padding: 16px 48px;
+    border-radius: 30px;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.2s;
+    display: inline-block;
+    text-decoration: none;
+    animation: wobbleBtn 3s ease-in-out infinite;
+}
+
+.b2b-offer-btn:hover {
+    box-shadow: 0 0 25px rgba(57, 255, 20, 0.6);
+    animation-play-state: running;
+}
+
+.b2b-offer-btn:active {
+    transform: scale(0.95);
+    animation-play-state: paused;
+}
+
+/* Юридический дисклеймер — внутри карточки, прижат к низу
+   с внутренним отступом, чтобы текст не вылетал на карбоновый фон */
+.b2b-offer-disclaimer {
+    display: block;
+    flex-basis: 100%;
+    width: 100%;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #6b6e78;
+    line-height: 1.4;
+    text-align: center;
+    padding-bottom: 8px;
+}
+
+/* Адаптивность: вертикальный стек на мобильных */
+@media (max-width: 768px) {
+    .b2b-offer-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        padding: 28px 24px;
+    }
+
+    .b2b-offer-text {
+        text-align: center;
+    }
+
+    .b2b-offer-btn {
+        width: 100%;
     }
 }
