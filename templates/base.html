@@ -13,5 +13,27 @@
     <!-- Глобальные скрипты -->
     <script src="{{ url_with_timestamp('js/main.js') }}"></script>
     {% block scripts %}{% endblock %}
+
+    <!-- Модальное окно ИИ-расчёта прибыли -->
+    <div class="modal-overlay" id="calcModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Индивидуальный ИИ-расчёт прибыли</h3>
+                <button class="modal-close" id="calcModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="calculator-form">
+                    <input type="text" name="user_name" placeholder="Введите ваше имя" required>
+                    <input type="tel" name="user_phone" placeholder="Ваш номер телефона" required>
+                    <input type="text" name="user_city" placeholder="Ваш город (например, Москва)" required>
+                    <input type="number" name="user_budget" placeholder="Бюджет проекта (руб.)" required>
+                    <button type="submit" id="calc-submit-btn">
+                        Запустить ИИ-анализ рынка
+                    </button>
+                </form>
+                <div id="calc-result" class="hidden"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
