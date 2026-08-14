@@ -62,6 +62,7 @@ Unless the user explicitly asks otherwise, the agent should:
 - Ignore failing checks related to the files or behavior you changed.
 - Guess around security-sensitive, billing-sensitive, or compliance-sensitive behavior.
 - **Execute commands in the terminal** (`ls`, `cd`, `uvicorn`, `git`) when the terminal is already used for running the dev server — this causes conflicts and freezes the agent. The server must be started manually in a separate terminal by the developer.
+- NEVER use Linux-specific command-line utilities or pipelines (such as 'head', 'grep', 'cat', 'clear', etc.). All validation or testing commands must be executed strictly using Windows PowerShell syntax (e.g., use 'Select-Object -First X' instead of 'head -X'). Prioritize manual verification in the browser or use native Python inline flags ('python -c') if verification is necessary.
 
 ---
 
@@ -94,7 +95,7 @@ Do not write "latest". Use exact versions or supported ranges.
 - Database(s): none (статический лендинг)
 - Messaging / queueing: none
 - Cache / storage: none (статический кэш-брейкинг через timestamp)
-- Hosting / infrastructure: локальная разработка (Windows 11), целевой хостинг не определён
+- Hosting / infrastructure: Local development (Windows 11), default terminal is STRICTLY PowerShell. Target deployment hosting — Linux/Docker VPS.
 
 ### Key Libraries And Services
 

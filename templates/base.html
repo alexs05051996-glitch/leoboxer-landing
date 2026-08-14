@@ -10,6 +10,9 @@
 <body>
     {% block content %}{% endblock %}
 
+    <!-- Markdown-парсер для наглядного рендеринга ответов ИИ -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <!-- Глобальные скрипты -->
     <script src="{{ url_with_timestamp('js/main.js') }}"></script>
     {% block scripts %}{% endblock %}

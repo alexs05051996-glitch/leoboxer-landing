@@ -1,17 +1,45 @@
-<!-- Блок экономики и ИИ-ассистента -->
-<section id="ai-chat" class="ai-chat-section">
-    <div class="container chat-container">
-        <h2 class="section-title">Умный расчёт прибыли</h2>
-        <p class="section-description">Задайте параметры и получите прогноз от ИИ-ассистента</p>
-        <!-- Контейнер для будущего интерфейса чата -->
-        <div id="chat-interface" class="chat-placeholder">
-            <div class="chat-messages" aria-live="polite">
-                <p>Здесь появятся сообщения ассистента...</p>
+<!-- Модальное окно ИИ-чата Rocky Boxer -->
+<div id="ai-chat-modal" class="b2b-modal-overlay">
+    <div class="b2b-modal-content">
+        <!-- Шапка модалки: заголовок + крестик -->
+        <div class="b2b-modal-header">
+            <span class="b2b-modal-title">Rocky Boxer | ИИ-Аналитик завода</span>
+            <button class="modal-close-btn" aria-label="Закрыть">&times;</button>
+        </div>
+
+        <!-- Контейнер чата -->
+        <div id="chat-interface" class="chat-interface">
+            <!-- Сообщения чата -->
+            <div id="chat-messages" class="chat-messages" aria-live="polite">
+                <!-- Первое сообщение от Rocky Boxer добавляется через JS -->
             </div>
-            <form id="chat-form" class="chat-form">
-                <input type="text" id="chat-input" placeholder="Введите ваш город, площадь и т.д.">
-                <button type="submit" class="btn btn-chat">Рассчитать</button>
-            </form>
+
+            <!-- Область ввода (шаги 1, 2, 4, 5) -->
+            <div id="chat-input-area" class="chat-input-area">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Введите ваш ответ..." autocomplete="off">
+                <button id="chat-send-btn" class="btn btn-chat-send">Далее</button>
+            </div>
+
+            <!-- Контейнер для кнопок выбора модели (шаг 3) -->
+            <div id="model-buttons" class="model-buttons" style="display: none;">
+                <button class="btn btn-model" data-model-value="Взрослый Классик">
+                    Взрослый Классик — 230 000 руб.
+                </button>
+                <button class="btn btn-model" data-model-value="Юниорский">
+                    Юниорский — 230 000 руб.
+                </button>
+                <button class="btn btn-model" data-model-value="Детская серия">
+                    Детская серия — 220 000 руб.
+                </button>
+            </div>
+
+            <!-- Состояние загрузки (показывается во время SSE) -->
+            <div id="chat-loading" class="chat-loading" style="display: none;">
+                <div class="loading-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="loading-text">Rocky Boxer генерирует расчёт...</span>
+            </div>
         </div>
     </div>
-</section>
+</div>
