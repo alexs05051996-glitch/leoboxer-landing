@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modelButtonsContainer = document.getElementById('model-buttons');
     const chatLoading = document.getElementById('chat-loading');
     const modalCloseBtn = document.querySelector('.modal-close-btn');
+    const backBtn = document.getElementById('chat-back-btn');
 
     if (!chatModal || !chatInterface || !chatMessages || !chatInputArea) return; // нет модалки — выходим
 
@@ -135,6 +136,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             chatInputArea.style.display = 'none';
         }
+        // Показываем/скрываем кнопку «Назад»
+        if (backBtn) {
+            backBtn.style.display = (currentStep > STEPS.NAME && showInput) ? 'inline-block' : 'none';
+        }
     }
 
     function showModelButtons() {
@@ -155,35 +160,48 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderStep(step, value) {
         switch (step) {
             case STEPS.NAME:
-                addMessage('🥊 Здравствуйте! Я — Rocky Boxer, старший аналитик завода «ЛЕО БОКСЕР». Давайте рассчитаем вашу прибыль! Как вас зовут?', 'assistant');
+                addMessage('Здравствуйте! Я — Rocky Boxer, старший аналитик завода «ЛЕО БОКСЕР». Давайте рассчитаем вашу прибыль! Как вас зовут?', 'assistant');
                 setInputMode('Ваше имя', 'Далее', true);
                 break;
             case STEPS.CITY:
-                leadData.name = value;
-                addMessage('Приятно познакомиться, ' + value + '! В каком городе планируете установку?', 'assistant');
+                if (value !== null) {
+                    leadData.name = value;
+                }
+                addMessage('Приятно познакомиться, ' + (leadData.name || '') + '! В каком городе планируете установку?', 'assistant');
                 setInputMode('Ваш город', 'Далее', true);
                 break;
             case STEPS.MODEL:
-                // value = город пользователя
-                leadData.city = value;
+                if (value !== null) {
+                    leadData.city = value;
+                }
                 addMessage('Отлично! Какую модель силомера выберем?', 'assistant');
-                setInputMode('', '', false);
+                setInputMode('Введите модель или выберите кнопкой', 'Далее', true);
                 showModelButtons();
                 break;
             case STEPS.BUDGET:
-                leadData.model_interest = value;
+                if (value !== null) {
+                    leadData.model_interest = value;
+                }
                 addMessage('Прекрасный выбор! Теперь укажите ваш бюджет на проект (в рублях):', 'assistant');
                 setInputMode('Бюджет в рублях (например, 700000)', 'Далее', true);
                 break;
             case STEPS.PHONE:
-                leadData.budget = value;
+                if (value !== null) {
+                    leadData.budget = value;
+                }
                 addMessage('И последний шаг: ваш номер телефона, чтобы закрепить расчёт.', 'assistant');
                 setInputMode('Номер телефона', 'Запустить ИИ-расчёт', true);
                 break;
             case STEPS.STREAMING:
-                leadData.phone = value;
+                if (value !== null) {
+                    leadData.phone = value;
+                }
                 finishChat();
                 break;
+        }
+        // Скрываем кнопки моделей, если не на шаге MODEL
+        if (step !== STEPS.MODEL) {
+            modelButtonsContainer.style.display = 'none';
         }
         scrollToBottom();
     }
@@ -206,6 +224,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderStep(STEPS.MODEL, value);
                 currentStep = STEPS.MODEL;
                 break;
+            case STEPS.MODEL:
+                leadData.model_interest = value;
+                renderStep(STEPS.BUDGET, value);
+                currentStep = STEPS.BUDGET;
+                break;
             case STEPS.BUDGET:
                 if (!/^\d[\d\s\u00A0]*$/.test(value.replace(/\s/g, ''))) {
                     addMessage('️Пожалуйста, введите бюджет числом, например 700000.', 'assistant');
@@ -222,6 +245,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         chatInput.value = '';
         scrollToBottom();
+    }
+
+    // ===== Возврат на шаг назад =====
+    function goBack() {
+        if (currentStep <= STEPS.NAME || isStreaming) return;
+
+        // Удаляем последние два сообщения (пользователь + бот)
+        const messages = chatMessages.querySelectorAll('.message');
+        if (messages.length >= 2) {
+            messages[messages.length - 1].remove();
+            messages[messages.length - 2].remove();
+        }
+
+        currentStep--;
+
+        // Скрываем кнопки моделей при возврате с шага MODEL
+        modelButtonsContainer.style.display = 'none';
+
+        // Перерисовываем предыдущий шаг с сохранёнными данными
+        renderStep(currentStep, null);
     }
 
     // ===== Финальная отправка + SSE =====
@@ -349,6 +392,9 @@ document.addEventListener('DOMContentLoaded', function() {
         chatInputArea.style.display = 'flex';
         chatInput.value = '';
         chatSendBtn.disabled = false;
+        if (backBtn) {
+            backBtn.style.display = 'none';
+        }
     }
 
     // ===== Инициализация: приветствие =====
@@ -382,6 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ===== События =====
     chatSendBtn.addEventListener('click', handleSend);
+    if (backBtn) {
+        backBtn.addEventListener('click', goBack);
+    }
     chatInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -395,6 +444,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (btn && btn.dataset.modelValue) {
             const modelValue = btn.dataset.modelValue;
             leadData.model_interest = modelValue;
+            // Добавить сообщение пользователя с выбранной моделью
+            addMessage(modelValue, 'user');
+            // Затем перейти к бюджету
             renderStep(STEPS.BUDGET, modelValue);
             currentStep = STEPS.BUDGET;
         }

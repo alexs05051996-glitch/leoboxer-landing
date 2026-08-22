@@ -11,65 +11,67 @@ LARGE_REGIONAL = [
     "ярославль", "ижевск", "барнаул", "ульяновск", "оренбург"
 ]
 
+
 def get_city_config(city_name):
     city = city_name.lower().replace("ё", "е")
     if any(m in city for m in MEGA_CITIES):
-        return {"type": "мегаполис", "rent": 15_000, "low_rev": 150_000, "peak_rev": 350_000}
+        return {"type": "Топовая локация", "rent": 10000, "rev_low": 90000, "rev_high": 120000}
     elif any(c in city for c in LARGE_REGIONAL):
-        return {"type": "крупный областной центр", "rent": 10_000, "low_rev": 100_000, "peak_rev": 280_000}
+        return {"type": "Среднее арифметическое", "rent": 6000, "rev_low": 52000, "rev_high": 60000}
     else:
-        return {"type": "средний / малый город", "rent": 6_000, "low_rev": 80_000, "peak_rev": 220_000}
+        return {"type": "Объемы локации", "rent": 3000, "rev_low": 30000, "rev_high": 45000}
+
 
 def calculate_local(budget_num, city_name, user_name):
-    if budget_num < 400_000:
+    # Определяем модель и количество аппаратов
+    # Модель фиксированная — Юниорский (200 см) — 230 000 руб.
+    model_price = 230000
+    delivery_install = 0.1  # 10% на доставку/установку
+    total_per_unit = model_price * (1 + delivery_install)
+    units = budget_num // int(total_per_unit)
+    if units < 1:
         units = 1
-    elif budget_num <= 750_000:
-        units = 2
+
+    cfg = get_city_config(city_name)
+    rent = cfg["rent"]
+    rev_low = cfg["rev_low"]
+    rev_high = cfg["rev_high"]
+
+    # Налоги (УСН 6% + эквайринг) — берём из таблицы
+    if cfg["type"] == "Топовая локация":
+        tax = 6000
+    elif cfg["type"] == "Среднее арифметическое":
+        tax = 3500
     else:
-        units = 4
+        tax = 2000
 
-    city_cfg = get_city_config(city_name)
-    rent_per_unit = city_cfg["rent"]
-    low_rev = city_cfg["low_rev"]
-    peak_rev = city_cfg["peak_rev"]
-    avg_rev = (low_rev + peak_rev) // 2
+    # Выручка, аренда, налоги — на 1 аппарат
+    rev_low_per = rev_low
+    rev_high_per = rev_high
 
-    def calc(revenue_per_unit):
-        total = revenue_per_unit * units
-        tax = total * 0.06
-        acq = total * 0.02
-        elect = 800 * units
-        rent = rent_per_unit * units
-        expenses = tax + acq + elect + rent
-        net = total - expenses
-        return round(net), round(expenses)
+    # Чистая прибыль на 1 аппарат = выручка - аренда - налоги (упрощённо)
+    net_low = rev_low_per - rent - tax
+    net_high = rev_high_per - rent - tax
 
-    net_low, exp_low = calc(low_rev)
-    net_avg, exp_avg = calc(avg_rev)
-    net_peak, exp_peak = calc(peak_rev)
+    # Окупаемость = цена аппарата / чистая прибыль в месяц
+    payback_low = model_price / net_high if net_high > 0 else 0
+    payback_high = model_price / net_low if net_low > 0 else 0
+
+    def fmt(v):
+        return f"{v:,}".replace(",", " ")
+
+    avg_net = (net_low + net_high) // 2
+    avg_payback = round((payback_low + payback_high) / 2, 1)
 
     return (
-        f"🥊 {user_name}, здравствуй! На связи Rocky Boxer, старший аналитик завода «ЛЕО БОКСЕР».\n"
-        f"Разбираем твой проект в городе {city_name} ({city_cfg['type']}).\n"
-        f"Бюджет {budget_num:,} руб. — ты берёшь {units} аппарат(а) Classic.\n\n"
-        f"Вот реальная экономика без копеечных фантазий:\n\n"
-        f"📊 СЕЗОННАЯ ВИЛКА (на {units} аппарат(а)):\n"
-        f"❄️ Низкий сезон (выручка {low_rev:,} ₽/аппарат):\n"
-        f"   Чистая прибыль: {net_low:,} ₽/мес\n"
-        f"   Расходы: {exp_low:,} ₽/мес\n\n"
-        f"📈 Средний сезон (выручка {avg_rev:,} ₽/аппарат):\n"
-        f"   Чистая прибыль: {net_avg:,} ₽/мес\n"
-        f"   Расходы: {exp_avg:,} ₽/мес\n\n"
-        f"🔥 Пик сезона (выручка {peak_rev:,} ₽/аппарат):\n"
-        f"   Чистая прибыль: {net_peak:,} ₽/мес\n"
-        f"   Расходы: {exp_peak:,} ₽/мес\n\n"
-        f"📍 ТАКТИКА ПО ЛОКАЦИЯМ В {city_name.upper()}:\n"
-        f"• Летом: набережные, парки, центральные площади.\n"
-        f"• Зимой: крупные ТЦ с фудкортом и кинотеатром.\n\n"
-        f"⚠️ РЕАЛЬНЫЕ РИСКИ И ЗАЩИТА:\n"
-        f"• Вандализм: стальной корпус 2 мм, порошковая покраска.\n"
-        f"• Воровство: сейфовый замок и антивандальный купюроприемник.\n"
-        f"• Контроль: Boxnet мониторит всё 24/7, мгновенные SMS при сбоях.\n\n"
-        f"Итог: средняя чистая прибыль ~{(net_low + net_avg) // 2:,} ₽/мес, окупаемость 2.5–3 месяца.\n"
-        f"Оставляй контакты, менеджер завода свяжется и забронирует лучшие точки в {city_name}."
+        f"Здравствуйте, {user_name}! Я — Rocky Boxer, аналитик завода «ЛЕО БОКСЕР».\n\n"
+        f"- Модель: Юниорский — {fmt(model_price)} руб.\n"
+        f"- Количество аппаратов: {units}\n"
+        f"- Выручка в месяц: {fmt(rev_low_per)} – {fmt(rev_high_per)} руб.\n"
+        f"- Аренда: ~{fmt(rent)} руб.\n"
+        f"- Налоги: ~{fmt(tax)} руб.\n"
+        f"- Чистая прибыль: {fmt(net_low)} – {fmt(net_high)} руб./мес.\n"
+        f"- Окупаемость: {payback_low:.0f} – {payback_high:.0f} мес.\n\n"
+        f"Средняя чистая прибыль ~{fmt(avg_net)} руб./мес, окупаемость {avg_payback:.0f} мес.\n"
+        f"Оставьте контакты, менеджер свяжется и подберёт лучшие точки."
     )

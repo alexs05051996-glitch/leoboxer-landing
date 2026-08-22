@@ -1028,6 +1028,10 @@ body {
     font-size: 0.95rem;
     line-height: 1.5;
     word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: manual;
 }
 
 /* Сообщение ассистента (Rocky Boxer) — слева, графитовый пузырёк */
@@ -1057,6 +1061,12 @@ body {
     border: 1px solid var(--neon-blue);
     color: #000000;
     border-bottom-right-radius: 4px;
+    flex-shrink: 0;            /* запрет сжатия */
+    max-width: 100%;           /* не ограничивать ширину */
+    width: auto;               /* ширина по содержимому */
+    min-width: 70px;           /* чтобы короткие имена помещались */
+    word-break: break-word;
+    white-space: normal;
 }
 
 /* Каретка печатания (мигающий курсор) */
@@ -1294,5 +1304,69 @@ body {
         font-size: 1.5rem;
         width: 28px;
         height: 28px;
+    }
+}
+
+/* Кнопка «Назад» (стрелка влево) в чате */
+.btn-back {
+    background: transparent;
+    border: none;
+    color: #8a8d98;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.btn-back:hover {
+    color: #ffffff;
+}
+@media (max-width: 600px) {
+    .btn-back {
+        font-size: 20px;
+        padding: 0 4px;
+    }
+}
+
+/* ===== Стили для Markdown-контента в пузырьках ===== */
+.message-bubble strong {
+    color: var(--neon-blue);
+    font-weight: 700;
+}
+
+.message-bubble ul,
+.message-bubble ol {
+    margin: 4px 0 8px 0;
+    padding-left: 20px;
+}
+
+.message-bubble li {
+    margin-bottom: 2px;
+    list-style-type: disc;
+}
+
+.message-bubble hr {
+    border: none;
+    border-top: 1px solid rgba(0, 240, 255, 0.2);
+    margin: 8px 0;
+}
+
+.message-bubble p {
+    margin: 4px 0;
+}
+
+.message-bubble .highlight {
+    color: var(--neon-pink);
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .message-bubble ul,
+    .message-bubble ol {
+        padding-left: 16px;
+    }
+    .message-bubble li {
+        font-size: 0.9rem;
     }
 }
