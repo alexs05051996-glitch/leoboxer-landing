@@ -26,3 +26,9 @@ env/
 response.html
 шаблон AGENTS.md
 *.log
+
+# Secrets
+.env
+credentials.json
+*.key
+*.pem
