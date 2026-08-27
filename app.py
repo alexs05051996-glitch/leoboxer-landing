@@ -22,7 +22,9 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 OPENROUTER_MODEL = "deepseek/deepseek-v4-flash-latest"
 
 # Google Sheets
-SHEET_KEY = "1ELgDKCp6yutspz7fCM-D8RifjIGp2EuMzY7Sa9nP7J4"
+GS_SPREADSHEET_ID = os.getenv('GS_SPREADSHEET_ID')
+if GS_SPREADSHEET_ID is None:
+    raise ValueError("Missing GS_SPREADSHEET_ID in .env")
 CREDENTIALS_FILE = "credentials.json"
 
 # ===== Клиент OpenRouter =====
@@ -40,7 +42,7 @@ def get_sheet():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, scope)
     client = gspread.authorize(creds)
-    sheet = client.open_by_key(SHEET_KEY).sheet1
+    sheet = client.open_by_key(GS_SPREADSHEET_ID).sheet1
     return sheet
 
 def insert_lead_row(name, phone, city, budget, model):

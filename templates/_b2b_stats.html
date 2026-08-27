@@ -1,0 +1,75 @@
+<!-- B2B-блок статистики франшизы ЛЕО БОКСЕР -->
+<section class="b2b-stats" data-cpa-block="stats">
+    <div class="b2b-offer-card">
+        <!-- Шапка блока: заголовок слева, логотип справа -->
+        <div class="b2b-stats-header">
+            <h2>Франшиза силомеров от производителя: цифры, которые говорят о прибыли и окупаемости</h2>
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+                <!-- Иконка льва (логотип) -->
+                <img src="{{ url_for('static', path='assets/logo.png') }}" alt="ЛЕО БОКСЕР" class="b2b-brand__icon" width="100" height="100">
+                <span class="b2b-brand__text">ЛЕО БОКСЕР</span>
+            </div>
+        </div>
+
+        <!-- Сетка показателей 3×2 (десктоп) → 2×3 (планшет) → 1×6 (мобильные) -->
+        <div class="b2b-stats-grid">
+            <!-- 1. Стартовая стоимость -->
+            <div class="stat-item" data-cpa="price">
+                <div class="stat-item__icon">🎯</div>
+                <div class="stat-item__value stat-item--blue">от 220 000 ₽</div>
+                <div class="stat-item__caption">Стартовая стоимость франшизы</div>
+            </div>
+            <!-- 2. Рентабельность -->
+            <div class="stat-item" data-cpa="margin">
+                <div class="stat-item__icon">📈</div>
+                <div class="stat-item__value stat-item--green">60%</div>
+                <div class="stat-item__caption">Рентабельность бизнеса</div>
+            </div>
+            <!-- 3. Без сотрудников -->
+            <div class="stat-item" data-cpa="staff">
+                <div class="stat-item__icon">📱</div>
+                <div class="stat-item__value stat-item--purple">0</div>
+                <div class="stat-item__caption">Сотрудников — управление через телефон</div>
+            </div>
+            <!-- 4. Площадь -->
+            <div class="stat-item" data-cpa="area">
+                <div class="stat-item__icon">📐</div>
+                <div class="stat-item__value stat-item--red">1 м²</div>
+                <div class="stat-item__caption">Площадь под один аппарат</div>
+            </div>
+            <!-- 5. Окупаемость -->
+            <div class="stat-item" data-cpa="payback">
+                <div class="stat-item__icon">⏱</div>
+                <div class="stat-item__value stat-item--orange">6 месяцев</div>
+                <div class="stat-item__caption">Средняя окупаемость</div>
+            </div>
+            <!-- 6. Количество точек -->
+            <div class="stat-item" data-cpa="points">
+                <div class="stat-item__icon">🏭</div>
+                <div class="stat-item__value stat-item--teal">500+</div>
+                <div class="stat-item__caption">Аппаратов в сети по всей стране</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEO-микроразметка Schema.org (JSON-LD) — внизу блока -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Франшиза силомеров ЛЕО БОКСЕР от производителя",
+      "description": "Готовая бизнес-модель вендинга силомеров: прибыльная франшиза от прямого производителя без посредников с быстрой окупаемостью.",
+      "offers": {
+        "@type": "Offer",
+        "price": "220000",
+        "priceCurrency": "RUB",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "45"
+      }
+    }
+    </script>
+</section>

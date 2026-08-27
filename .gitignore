@@ -29,6 +29,8 @@ response.html
 
 # Secrets
 .env
+.env.*
+*.env
 credentials.json
 *.key
 *.pem
