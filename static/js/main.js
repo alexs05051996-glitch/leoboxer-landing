@@ -486,3 +486,162 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// === ОБРАБОТЧИК ФОРМЫ В БЛОКЕ «Начни бизнес с надёжным партнёром» ===
+// Отправляет данные на /api/calculate/ и показывает результат
+document.addEventListener('DOMContentLoaded', function() {
+    const ctaForm = document.getElementById('b2b-cta-form');
+    if (!ctaForm) return;
+
+    const ctaResult = document.getElementById('b2b-cta-result');
+    const ctaSubmitBtn = ctaForm.querySelector('.b2b-cta-submit');
+
+    ctaForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Собираем данные формы
+        const formData = new FormData(ctaForm);
+
+        // Показываем состояние загрузки
+        ctaSubmitBtn.disabled = true;
+        ctaSubmitBtn.textContent = '⏳ Генерируем расчёт...';
+        ctaResult.hidden = true;
+
+        try {
+            const response = await fetch('/api/calculate/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => null);
+                throw new Error(errData?.message || 'Ошибка сервера: ' + response.status);
+            }
+
+            const data = await response.json();
+
+            if (data.status === 'success' && data.result) {
+                // Скрываем форму, показываем результат
+                ctaForm.style.display = 'none';
+                ctaResult.hidden = false;
+
+                // Рендерим через marked (если библиотека загружена) или как текст
+                if (typeof marked !== 'undefined') {
+                    ctaResult.innerHTML = marked.parse(data.result);
+                } else {
+                    ctaResult.textContent = data.result;
+                }
+            } else {
+                throw new Error(data.message || 'Не удалось получить расчёт');
+            }
+        } catch (error) {
+            console.error('[b2b-cta]', error);
+            ctaResult.hidden = false;
+            ctaResult.innerHTML = '<p class="b2b-cta-error">⚠️ ' + escapeHtml(error.message) + '</p>'
+                + '<button type="button" class="b2b-offer-btn b2b-cta-retry" onclick="location.reload()">Попробовать снова</button>';
+        } finally {
+            ctaSubmitBtn.disabled = false;
+            ctaSubmitBtn.textContent = 'Запустить ИИ-анализ рынка';
+        }
+    });
+});
+// === СЛАЙДЕР «НАШИ ФРАНЧАЙЗИ» (чистый JS, без зависимостей) ===
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.b2b-testimonials-slider');
+    if (!slider) return;
+
+    const slides = slider.querySelectorAll('.b2b-testimonials-slide');
+    const dots  = document.querySelectorAll('.b2b-testimonials-dot');
+    const prev  = slider.querySelector('.b2b-testimonials-nav--prev');
+    const next  = slider.querySelector('.b2b-testimonials-nav--next');
+    const total = slides.length;
+    if (total === 0) return;
+
+    let currentIndex = 0;
+
+    function goTo(index) {
+        if (index < 0 || index >= total) return;
+
+        // Скрываем все слайды, показываем целевой
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('is-active', i === index);
+        });
+
+        // Обновляем точки + aria-current
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('is-active', i === index);
+            if (i === index) {
+                dot.setAttribute('aria-current', 'true');
+            } else {
+                dot.removeAttribute('aria-current');
+            }
+        });
+
+        // Стрелки: блокируем на краях
+        prev.disabled = index === 0;
+        next.disabled = index === total - 1;
+
+        currentIndex = index;
+    }
+
+    // Клик по стрелкам
+    if (prev) prev.addEventListener('click', () => goTo(currentIndex - 1));
+    if (next) next.addEventListener('click', () => goTo(currentIndex + 1));
+
+    // Клик по точкам
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goTo(i));
+    });
+
+    // Клавиши ← →
+    document.addEventListener('keydown', function(e) {
+        // Срабатывает, если слайдер в области видимости или активен
+        const rect = slider.closest('.b2b-testimonials-card');
+        if (!rect) return;
+        const bounds = rect.getBoundingClientRect();
+        const isVisible = bounds.top < window.innerHeight && bounds.bottom > 0;
+        if (!isVisible) return;
+
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            goTo(currentIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            goTo(currentIndex + 1);
+        }
+    });
+
+    // Свайп на мобильных (touch)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+
+    slider.addEventListener('touchstart', function(e) {
+        const touch = e.changedTouches[0];
+        touchStartX = touch.screenX;
+        touchStartY = touch.screenY;
+        isSwiping = true;
+    }, { passive: true });
+
+    slider.addEventListener('touchend', function(e) {
+        if (!isSwiping) return;
+        isSwiping = false;
+
+        const touch = e.changedTouches[0];
+        const deltaX = touch.screenX - touchStartX;
+        const deltaY = touch.screenY - touchStartY;
+
+        // Горизонтальный свайп > 50px и доминирующий по X
+        if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+            if (deltaX < 0) {
+                // Свайп влево → следующий
+                goTo(currentIndex + 1);
+            } else {
+                // Свайп вправо → предыдущий
+                goTo(currentIndex - 1);
+            }
+        }
+    }, { passive: true });
+
+    // Инициализация: первый слайд (уже .is-active в разметке, но синхронизируем стейт)
+    goTo(0);
+});
